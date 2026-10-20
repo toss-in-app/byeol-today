@@ -2,6 +2,7 @@ import { colors } from '@toss/tds-colors';
 import { List, ListRow, Text, Top } from '@toss/tds-mobile';
 
 import { signInfo, type Content } from '../content';
+import { eulReul } from '../lib/josa';
 import { houseOf, readingFor, skyDay, type SignId } from '../sky';
 
 export interface SignScreenProps {
@@ -31,7 +32,7 @@ export function SignScreen({ content, today, sign }: SignScreenProps) {
           return (
             <>
               <Text display="block" typography="t6" color={colors.grey800} style={{ margin: '0 20px 8px' }}>
-                오늘 달은 {signInfo(content, day.moon).name}에 있어요. 나의 {reading.house}번째 집 '{house.theme}'을 지나요.
+                오늘 달은 {signInfo(content, day.moon).name}에 있어요. 나의 {reading.house}번째 집 {eulReul(`'${house.theme}'`)} 지나요.
               </Text>
               <List>
                 <ListRow contents={<ListRow.Texts type="2RowTypeA" top="총운" bottom={reading.total} />} />
