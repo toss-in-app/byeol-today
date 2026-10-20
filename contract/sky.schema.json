@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://toss-in-app.github.io/zodiac-today/sky.schema.json",
+  "title": "zodiac-today 오늘 하늘 표 v1",
+  "description": "빌드 때 astronomy-engine 으로 계산한 날마다의 달 정보. 번들에 1~2년 치, 다음 해 분은 정적 JSON(sky-YYYY.json)으로 연장. 한국 시간 아침 8시 기준. 문장이 아니라 계산 결과라 content 와 따로 둔다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "timezone",
+    "sampleTime",
+    "source",
+    "from",
+    "to",
+    "days"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "timezone": {
+      "const": "Asia/Seoul"
+    },
+    "sampleTime": {
+      "const": "08:00"
+    },
+    "source": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "from": {
+      "$ref": "#/$defs/date"
+    },
+    "to": {
+      "$ref": "#/$defs/date"
+    },
+    "days": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/day"
+      }
+    }
+  },
+  "$defs": {
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "date",
+        "moon",
+        "transit",
+        "phase",
+        "illumination"
+      ],
+      "dependentRequired": {
+        "nextSign": [
+          "changeAt"
+        ],
+        "changeAt": [
+          "nextSign"
+        ]
+      },
+      "properties": {
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "moon": {
+          "enum": [
+            "aries",
+            "taurus",
+            "gemini",
+            "cancer",
+            "leo",
+            "virgo",
+            "libra",
+            "scorpio",
+            "sagittarius",
+            "capricorn",
+            "aquarius",
+            "pisces"
+          ]
+        },
+        "transit": {
+          "enum": [
+            "enter",
+            "stay",
+            "leave"
+          ],
+          "description": "아침 8시 기준: 어제와 별자리가 다르면 enter, 내일과 다르면 leave, 아니면 stay"
+        },
+        "phase": {
+          "enum": [
+            "new",
+            "waxing-crescent",
+            "first-quarter",
+            "waxing-gibbous",
+            "full",
+            "waning-gibbous",
+            "last-quarter",
+            "waning-crescent"
+          ]
+        },
+        "illumination": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "nextSign": {
+          "enum": [
+            "aries",
+            "taurus",
+            "gemini",
+            "cancer",
+            "leo",
+            "virgo",
+            "libra",
+            "scorpio",
+            "sagittarius",
+            "capricorn",
+            "aquarius",
+            "pisces"
+          ],
+          "description": "그날 8시 뒤 자정 전에 달이 옮겨 가면"
+        },
+        "changeAt": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        }
+      }
+    }
+  }
+}

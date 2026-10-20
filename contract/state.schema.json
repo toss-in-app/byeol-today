@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://toss-in-app.github.io/zodiac-today/state.schema.json",
+  "title": "zodiac-today 기기 저장 v1 (Storage 키)",
+  "description": "기기 로컬 Storage 에 문자열(JSON)로 저장. 개인정보 없음 — 생일·태어난 해는 저장하지 않고 고른 별자리만. 모양이 다르면 클라는 빈 값으로 취급한다.",
+  "type": "object",
+  "required": [
+    "zodiac.mine.v1",
+    "zodiac.settings.v1"
+  ],
+  "properties": {
+    "zodiac.mine.v1": {
+      "$ref": "#/$defs/mine"
+    },
+    "zodiac.settings.v1": {
+      "$ref": "#/$defs/settings"
+    }
+  },
+  "$defs": {
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "epochMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "items"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "sign",
+              "label",
+              "addedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]{8,32}$"
+              },
+              "sign": {
+                "enum": [
+                  "aries",
+                  "taurus",
+                  "gemini",
+                  "cancer",
+                  "leo",
+                  "virgo",
+                  "libra",
+                  "scorpio",
+                  "sagittarius",
+                  "capricorn",
+                  "aquarius",
+                  "pisces"
+                ]
+              },
+              "label": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8
+                  }
+                ]
+              },
+              "addedAt": {
+                "$ref": "#/$defs/epochMs"
+              }
+            }
+          }
+        }
+      },
+      "description": "내 별자리(최대 5개, 같은 별자리도 이름표가 다르면 여러 번 가능). 순서 = 홈에 보이는 순서"
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "notification",
+        "ads",
+        "unlocks",
+        "seenContentVersion",
+        "firstOpenAt"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "notification": {
+          "enum": [
+            "unknown",
+            "agreed",
+            "declined"
+          ]
+        },
+        "ads": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lastInterstitialDate"
+          ],
+          "properties": {
+            "lastInterstitialDate": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/date"
+                }
+              ]
+            }
+          }
+        },
+        "unlocks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tomorrow",
+            "matchDetail"
+          ],
+          "properties": {
+            "tomorrow": {
+              "$ref": "#/$defs/dayUnlock"
+            },
+            "matchDetail": {
+              "$ref": "#/$defs/dayUnlock"
+            }
+          },
+          "description": "리워드로 연 것 — 그날(한국 날짜)만 유효"
+        },
+        "seenContentVersion": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "firstOpenAt": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/epochMs"
+            }
+          ]
+        }
+      }
+    },
+    "dayUnlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "date",
+        "keys"
+      ],
+      "properties": {
+        "date": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/date"
+            }
+          ]
+        },
+        "keys": {
+          "type": "array",
+          "maxItems": 66,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]+(-[a-z]+)?$"
+          }
+        }
+      },
+      "description": "tomorrow: 별자리 id 목록, matchDetail: 'aries-leo' 처럼 이름 순으로 정렬한 쌍"
+    }
+  }
+}

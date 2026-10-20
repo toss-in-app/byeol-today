@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "timezone": "Asia/Seoul",
+  "years": {
+    "1990": [
+      {
+        "sign": "aquarius",
+        "at": "01-20T17:01"
+      },
+      {
+        "sign": "pisces",
+        "at": "02-19T07:13"
+      },
+      {
+        "sign": "aries",
+        "at": "03-21T06:19"
+      },
+      {
+        "sign": "taurus",
+        "at": "04-20T17:26"
+      },
+      {
+        "sign": "gemini",
+        "at": "05-21T16:37"
+      },
+      {
+        "sign": "cancer",
+        "at": "06-22T00:32"
+      },
+      {
+        "sign": "leo",
+        "at": "07-23T11:21"
+      },
+      {
+        "sign": "virgo",
+        "at": "08-23T18:20"
+      },
+      {
+        "sign": "libra",
+        "at": "09-23T15:55"
+      },
+      {
+        "sign": "scorpio",
+        "at": "10-24T01:14"
+      },
+      {
+        "sign": "sagittarius",
+        "at": "11-22T22:47"
+      },
+      {
+        "sign": "capricorn",
+        "at": "12-22T12:06"
+      }
+    ],
+    "2026": [
+      {
+        "sign": "aquarius",
+        "at": "01-20T10:44"
+      },
+      {
+        "sign": "pisces",
+        "at": "02-19T00:51"
+      },
+      {
+        "sign": "aries",
+        "at": "03-20T23:45"
+      },
+      {
+        "sign": "taurus",
+        "at": "04-20T10:39"
+      },
+      {
+        "sign": "gemini",
+        "at": "05-21T09:37"
+      },
+      {
+        "sign": "cancer",
+        "at": "06-21T17:25"
+      },
+      {
+        "sign": "leo",
+        "at": "07-23T04:13"
+      },
+      {
+        "sign": "virgo",
+        "at": "08-23T11:18"
+      },
+      {
+        "sign": "libra",
+        "at": "09-23T09:05"
+      },
+      {
+        "sign": "scorpio",
+        "at": "10-23T18:38"
+      },
+      {
+        "sign": "sagittarius",
+        "at": "11-22T16:23"
+      },
+      {
+        "sign": "capricorn",
+        "at": "12-22T05:50"
+      }
+    ]
+  }
+}

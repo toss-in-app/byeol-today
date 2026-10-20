@@ -1,0 +1,901 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://toss-in-app.github.io/zodiac-today/content.schema.json",
+  "title": "zodiac-today 콘텐츠 v1",
+  "description": "정적 JSON(content.json)과 번들 동봉본의 모양. 화면에 그대로 보여질 완성 문장만 — URL·표현식·템플릿 문자열 없음. 별자리·집·달 모양 번호를 문장에 끼워 넣는 일은 클라가 한다(번들 고정 문구). 금칙어(주식·코인·복권·질병·사고 등)와 이모지는 빌드 스크립트에서 검사한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contentVersion",
+    "minClientVersion",
+    "updatedAt",
+    "notice",
+    "signs",
+    "houses",
+    "readings",
+    "phases",
+    "lucky",
+    "match",
+    "sky"
+  ],
+  "properties": {
+    "contentVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "minClientVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "updatedAt": {
+      "$ref": "#/$defs/date"
+    },
+    "notice": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/text60"
+        }
+      ]
+    },
+    "signs": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": false,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "aries"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "taurus"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "gemini"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "cancer"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "leo"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "virgo"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "libra"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "scorpio"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "sagittarius"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "capricorn"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "aquarius"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sign"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "pisces"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "houses": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": false,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 2
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 3
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 4
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 7
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/house"
+            },
+            {
+              "properties": {
+                "n": {
+                  "const": 12
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "readings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "properties": {
+        "1": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "2": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "3": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "4": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "5": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "6": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "7": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "8": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "9": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "10": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "11": {
+          "$ref": "#/$defs/houseReadings"
+        },
+        "12": {
+          "$ref": "#/$defs/houseReadings"
+        }
+      },
+      "description": "달이 지나는 집(내 별자리부터 세어 1~12번째) × 영역 × 머무는 날"
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": false,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "new"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "waxing-crescent"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "first-quarter"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "waxing-gibbous"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "full"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "waning-gibbous"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "last-quarter"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/phase"
+            },
+            {
+              "properties": {
+                "id": {
+                  "const": "waning-crescent"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "lucky": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "colors",
+        "items"
+      ],
+      "properties": {
+        "colors": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 40,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/word"
+          }
+        },
+        "items": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 60,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/word"
+          }
+        }
+      },
+      "description": "행운의 색·물건. 행운의 숫자는 클라가 1~9 에서 고른다(로또를 떠올리는 1~45 금지)"
+    },
+    "match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairs",
+        "today"
+      ],
+      "properties": {
+        "pairs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fire-fire",
+            "earth-earth",
+            "air-air",
+            "water-water",
+            "fire-earth",
+            "fire-air",
+            "fire-water",
+            "earth-air",
+            "earth-water",
+            "air-water"
+          ],
+          "properties": {
+            "fire-fire": {
+              "$ref": "#/$defs/pair"
+            },
+            "earth-earth": {
+              "$ref": "#/$defs/pair"
+            },
+            "air-air": {
+              "$ref": "#/$defs/pair"
+            },
+            "water-water": {
+              "$ref": "#/$defs/pair"
+            },
+            "fire-earth": {
+              "$ref": "#/$defs/pair"
+            },
+            "fire-air": {
+              "$ref": "#/$defs/pair"
+            },
+            "fire-water": {
+              "$ref": "#/$defs/pair"
+            },
+            "earth-air": {
+              "$ref": "#/$defs/pair"
+            },
+            "earth-water": {
+              "$ref": "#/$defs/pair"
+            },
+            "air-water": {
+              "$ref": "#/$defs/pair"
+            }
+          }
+        },
+        "today": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fire",
+            "earth",
+            "air",
+            "water"
+          ],
+          "properties": {
+            "fire": {
+              "$ref": "#/$defs/text60"
+            },
+            "earth": {
+              "$ref": "#/$defs/text60"
+            },
+            "air": {
+              "$ref": "#/$defs/text60"
+            },
+            "water": {
+              "$ref": "#/$defs/text60"
+            }
+          },
+          "description": "오늘 달이 있는 별자리의 원소별 한 줄"
+        }
+      }
+    },
+    "sky": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intro",
+        "houses",
+        "phase",
+        "boundary",
+        "basis"
+      ],
+      "properties": {
+        "intro": {
+          "$ref": "#/$defs/text120"
+        },
+        "houses": {
+          "$ref": "#/$defs/text120"
+        },
+        "phase": {
+          "$ref": "#/$defs/text120"
+        },
+        "boundary": {
+          "$ref": "#/$defs/text120"
+        },
+        "basis": {
+          "$ref": "#/$defs/text120"
+        }
+      },
+      "description": "'오늘 하늘이란?' 설명"
+    }
+  },
+  "$defs": {
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "word": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12,
+      "pattern": "^(?!.*(https?://|intoss://|www\\.|!)).*$"
+    },
+    "text40": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "pattern": "^(?!.*(https?://|intoss://|www\\.|!)).*$"
+    },
+    "text60": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "pattern": "^(?!.*(https?://|intoss://|www\\.|!)).*$"
+    },
+    "text120": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^(?!.*(https?://|intoss://|www\\.|!)).*$"
+    },
+    "sign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "dates",
+        "element",
+        "trait"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "aries",
+            "taurus",
+            "gemini",
+            "cancer",
+            "leo",
+            "virgo",
+            "libra",
+            "scorpio",
+            "sagittarius",
+            "capricorn",
+            "aquarius",
+            "pisces"
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/word"
+        },
+        "dates": {
+          "$ref": "#/$defs/text40"
+        },
+        "element": {
+          "enum": [
+            "fire",
+            "earth",
+            "air",
+            "water"
+          ]
+        },
+        "trait": {
+          "$ref": "#/$defs/text60"
+        }
+      }
+    },
+    "house": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "n",
+        "name",
+        "theme"
+      ],
+      "properties": {
+        "n": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "name": {
+          "$ref": "#/$defs/word"
+        },
+        "theme": {
+          "$ref": "#/$defs/word"
+        }
+      }
+    },
+    "areaDays": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enter",
+        "stay",
+        "leave"
+      ],
+      "properties": {
+        "enter": {
+          "$ref": "#/$defs/text60"
+        },
+        "stay": {
+          "$ref": "#/$defs/text60"
+        },
+        "leave": {
+          "$ref": "#/$defs/text60"
+        }
+      }
+    },
+    "houseReadings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "love",
+        "work",
+        "money"
+      ],
+      "properties": {
+        "total": {
+          "$ref": "#/$defs/areaDays"
+        },
+        "love": {
+          "$ref": "#/$defs/areaDays"
+        },
+        "work": {
+          "$ref": "#/$defs/areaDays"
+        },
+        "money": {
+          "$ref": "#/$defs/areaDays"
+        }
+      }
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "line"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "new",
+            "waxing-crescent",
+            "first-quarter",
+            "waxing-gibbous",
+            "full",
+            "waning-gibbous",
+            "last-quarter",
+            "waning-crescent"
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/word"
+        },
+        "line": {
+          "$ref": "#/$defs/text60"
+        }
+      }
+    },
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "detail"
+      ],
+      "properties": {
+        "summary": {
+          "$ref": "#/$defs/text60"
+        },
+        "detail": {
+          "$ref": "#/$defs/text120"
+        }
+      }
+    }
+  }
+}

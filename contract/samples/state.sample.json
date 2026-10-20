@@ -1,0 +1,40 @@
+{
+  "zodiac.mine.v1": {
+    "version": 1,
+    "items": [
+      {
+        "id": "k3f9a2b7c1",
+        "sign": "aquarius",
+        "label": "나",
+        "addedAt": 1792472105000
+      },
+      {
+        "id": "m8d2e4f6a0",
+        "sign": "leo",
+        "label": "엄마",
+        "addedAt": 1792472205000
+      }
+    ]
+  },
+  "zodiac.settings.v1": {
+    "version": 1,
+    "notification": "agreed",
+    "ads": {
+      "lastInterstitialDate": "2026-10-20"
+    },
+    "unlocks": {
+      "tomorrow": {
+        "date": "2026-10-20",
+        "keys": [
+          "aquarius"
+        ]
+      },
+      "matchDetail": {
+        "date": null,
+        "keys": []
+      }
+    },
+    "seenContentVersion": 1,
+    "firstOpenAt": 1792472005000
+  }
+}

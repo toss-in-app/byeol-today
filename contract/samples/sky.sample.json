@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "timezone": "Asia/Seoul",
+  "sampleTime": "08:00",
+  "source": "astronomy-engine 2.1.19",
+  "from": "2026-10-19",
+  "to": "2026-10-28",
+  "days": [
+    {
+      "date": "2026-10-19",
+      "moon": "capricorn",
+      "transit": "leave",
+      "phase": "first-quarter",
+      "illumination": 53,
+      "nextSign": "aquarius",
+      "changeAt": "10:40"
+    },
+    {
+      "date": "2026-10-20",
+      "moon": "aquarius",
+      "transit": "enter",
+      "phase": "first-quarter",
+      "illumination": 62
+    },
+    {
+      "date": "2026-10-21",
+      "moon": "aquarius",
+      "transit": "leave",
+      "phase": "waxing-gibbous",
+      "illumination": 72,
+      "nextSign": "pisces",
+      "changeAt": "21:35"
+    },
+    {
+      "date": "2026-10-22",
+      "moon": "pisces",
+      "transit": "enter",
+      "phase": "waxing-gibbous",
+      "illumination": 80
+    },
+    {
+      "date": "2026-10-23",
+      "moon": "pisces",
+      "transit": "leave",
+      "phase": "waxing-gibbous",
+      "illumination": 88
+    },
+    {
+      "date": "2026-10-24",
+      "moon": "aries",
+      "transit": "enter",
+      "phase": "waxing-gibbous",
+      "illumination": 94
+    },
+    {
+      "date": "2026-10-25",
+      "moon": "aries",
+      "transit": "stay",
+      "phase": "full",
+      "illumination": 98
+    },
+    {
+      "date": "2026-10-26",
+      "moon": "aries",
+      "transit": "leave",
+      "phase": "full",
+      "illumination": 100,
+      "nextSign": "taurus",
+      "changeAt": "08:34"
+    },
+    {
+      "date": "2026-10-27",
+      "moon": "taurus",
+      "transit": "enter",
+      "phase": "full",
+      "illumination": 99
+    },
+    {
+      "date": "2026-10-28",
+      "moon": "taurus",
+      "transit": "leave",
+      "phase": "waning-gibbous",
+      "illumination": 95,
+      "nextSign": "gemini",
+      "changeAt": "10:01"
+    }
+  ]
+}
