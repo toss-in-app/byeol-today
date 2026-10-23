@@ -10,7 +10,7 @@ const ME: MineItem = { id: 'aaaaaaaaaaaaaaaa', sign: 'aquarius', label: '나', a
 const MOM: MineItem = { id: 'bbbbbbbbbbbbbbbb', sign: 'leo', label: '엄마', addedAt: 2 };
 
 function renderHome(today: string, options: { mine?: MineItem[]; mineReady?: boolean; notificationPrompt?: boolean } = {}) {
-  const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn(), onAskNotification: vi.fn() };
+  const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn(), onAskNotification: vi.fn(), onOpenMatch: vi.fn(), onOpenSettings: vi.fn() };
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
       <HomeScreen
@@ -87,6 +87,14 @@ describe('HomeScreen', () => {
     cleanup();
     renderHome('2026-10-20', { mine: [ME], notificationPrompt: false });
     expect(screen.queryByText('매일 아침 8시 운세 알림 받기')).not.toBeInTheDocument();
+  });
+
+  it('맨 아래 궁합·설정 행', () => {
+    const { onOpenMatch, onOpenSettings } = renderHome('2026-10-20');
+    fireEvent.click(screen.getByText('별자리 궁합'));
+    expect(onOpenMatch).toHaveBeenCalled();
+    fireEvent.click(screen.getByText('설정'));
+    expect(onOpenSettings).toHaveBeenCalled();
   });
 
   it('저장소를 읽기 전에는 내 별자리 구역을 그리지 않아요', () => {

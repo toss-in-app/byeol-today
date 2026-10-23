@@ -8,11 +8,13 @@ import { SignScreen } from './SignScreen';
 
 const OK: AddMineResult = { ok: true, state: { version: 1, items: [] }, item: { id: 'aaaaaaaaaaaaaaaa', sign: 'leo', label: null, addedAt: 0 } };
 
+const onOpenMatch = vi.fn();
+
 function renderSign(inMine = false, mineCount = 1, result: AddMineResult = OK) {
   const onRegister = vi.fn(async () => result);
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
-      <SignScreen content={bundledContent} today="2026-10-20" sign="leo" inMine={inMine} mineCount={mineCount} onRegister={onRegister} />
+      <SignScreen content={bundledContent} today="2026-10-20" sign="leo" inMine={inMine} mineCount={mineCount} onRegister={onRegister} onOpenMatch={onOpenMatch} />
     </TDSMobileAITProvider>,
   );
   return onRegister;
@@ -34,10 +36,12 @@ describe('SignScreen — 내 별자리로 등록', () => {
     await waitFor(() => expect(onRegister).toHaveBeenCalledWith('leo', '엄마'));
   });
 
-  it('이미 내 별자리면 버튼 대신 표시', () => {
+  it('이미 내 별자리면 버튼 대신 표시, 궁합 보기는 항상', () => {
     renderSign(true);
     expect(screen.getByText('내 별자리에 있어요')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '내 별자리로 등록' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '궁합 보기' }));
+    expect(onOpenMatch).toHaveBeenCalled();
   });
 
   it('5개가 차 있으면 시트 대신 안내 창', async () => {

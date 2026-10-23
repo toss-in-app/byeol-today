@@ -5,10 +5,12 @@ import { bundledContent } from './content';
 import { useMine } from './hooks/useMine';
 import { useSettings } from './hooks/useSettings';
 import { kstDateKey } from './lib/date';
+import { isMatchDetailUnlocked, withMatchDetailUnlocked } from './lib/match';
 import { goBack, navigate, useRoute } from './lib/router';
 import { AGREEMENT_MESSAGES, ALREADY_AGREED_HINT, notificationAvailable, requestNotificationAgreement } from './notification/agreement';
 import { FindScreen } from './screens/FindScreen';
 import { HomeScreen } from './screens/HomeScreen';
+import { MatchScreen } from './screens/MatchScreen';
 import { MineScreen } from './screens/MineScreen';
 import { PlaceholderScreen } from './screens/PlaceholderScreen';
 import { SignScreen } from './screens/SignScreen';
@@ -27,6 +29,13 @@ export default function App() {
   }, [route]);
 
   const openSign = (sign: SignId) => navigate({ name: 'sign', sign });
+  const openMatch = (a?: SignId) => navigate(a ? { name: 'match', a } : { name: 'match' });
+
+  /** 궁합 자세히 — ⑥에서 리워드 광고를 거쳐요. 지금은 바로 열어요(출시 전에 광고로 바꿔요) */
+  const unlockMatchDetail = async (a: SignId, b: SignId) => {
+    await updateSettings((current) => withMatchDetailUnlocked(current, today, a, b));
+    return true;
+  };
 
   /** 알림 행은 내 별자리가 있고, 아직 묻지 않았고, 이 토스앱이 지원할 때만. 거부했으면 설정에서만 다시 */
   const notificationPrompt = settingsReady && settings.notification === 'unknown' && notificationAvailable();
@@ -59,10 +68,22 @@ export default function App() {
           onFind={() => navigate({ name: 'find' })}
           onEditMine={() => navigate({ name: 'mine' })}
           onAskNotification={() => void askNotification()}
+          onOpenMatch={() => openMatch()}
+          onOpenSettings={() => navigate({ name: 'settings' })}
         />
       );
     case 'sign':
-      return <SignScreen content={content} today={today} sign={route.sign} inMine={mine.has(route.sign)} mineCount={mine.items.length} onRegister={mine.add} />;
+      return (
+        <SignScreen
+          content={content}
+          today={today}
+          sign={route.sign}
+          inMine={mine.has(route.sign)}
+          mineCount={mine.items.length}
+          onRegister={mine.add}
+          onOpenMatch={() => openMatch(route.sign)}
+        />
+      );
     case 'find':
       return <FindScreen content={content} mineCount={mine.items.length} onRegister={mine.add} onDone={goBack} />;
     case 'mine':
@@ -79,7 +100,18 @@ export default function App() {
         />
       );
     case 'match':
-      return <PlaceholderScreen title="별자리 궁합" />;
+      return (
+        <MatchScreen
+          key={`${route.a ?? ''}-${route.b ?? ''}`}
+          content={content}
+          today={today}
+          mine={mine.items}
+          initialA={route.a}
+          initialB={route.b}
+          isDetailUnlocked={(a, b) => isMatchDetailUnlocked(settings, today, a, b)}
+          onUnlockDetail={unlockMatchDetail}
+        />
+      );
     case 'settings':
       return <PlaceholderScreen title="설정" />;
   }

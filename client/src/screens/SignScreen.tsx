@@ -18,10 +18,12 @@ export interface SignScreenProps {
   inMine: boolean;
   mineCount: number;
   onRegister: (sign: SignId, label: string | null) => Promise<AddMineResult>;
+  /** 이 별자리를 첫 자리에 넣고 궁합으로 */
+  onOpenMatch: () => void;
 }
 
-/** 별자리 자세히 — 오늘 하늘 근거·영역 4·달 모양 + 내 별자리로 등록(이름표 시트). 행운·내일 운세(리워드)·궁합·공유·배너는 뒤 기능에서 */
-export function SignScreen({ content, today, sign, inMine, mineCount, onRegister }: SignScreenProps) {
+/** 별자리 자세히 — 오늘 하늘 근거·영역 4·달 모양 + 내 별자리로 등록(이름표 시트) + 궁합 보기. 행운·내일 운세(리워드)·공유·배너는 뒤 기능에서 */
+export function SignScreen({ content, today, sign, inMine, mineCount, onRegister, onOpenMatch }: SignScreenProps) {
   const info = signInfo(content, sign);
   const day = skyDay(today);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -60,9 +62,9 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
       <Text display="block" typography="t6" color={colors.grey700} style={{ margin: '0 20px 12px' }}>
         {info.trait}
       </Text>
-      <div style={{ margin: '0 20px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 20px 16px' }}>
         {inMine ? (
-          <Text display="block" typography="t7" color={colors.grey600}>
+          <Text typography="t7" color={colors.grey600}>
             내 별자리에 있어요
           </Text>
         ) : (
@@ -70,6 +72,9 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
             내 별자리로 등록
           </Button>
         )}
+        <Button size="medium" color="dark" variant="weak" onClick={onOpenMatch}>
+          궁합 보기
+        </Button>
       </div>
       {day ? (
         (() => {

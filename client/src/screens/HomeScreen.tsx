@@ -20,13 +20,15 @@ export interface HomeScreenProps {
   onFind: () => void;
   onEditMine: () => void;
   onAskNotification: () => void;
+  onOpenMatch: () => void;
+  onOpenSettings: () => void;
 }
 
 /**
- * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 내 별자리(맨 위) + 아침 알림 행 + 12별자리 오늘 한 줄.
- * 광고 안내·궁합·설정 행은 뒤 기능과 함께(흐름: steps/3-design/wireframes/byeol-today-flow.md).
+ * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 내 별자리(맨 위) + 아침 알림 행 + 12별자리 오늘 한 줄 + 궁합·설정 행.
+ * 광고 안내는 ⑥에서(흐름: steps/3-design/wireframes/byeol-today-flow.md).
  */
-export function HomeScreen({ content, today, mine, mineReady, notificationPrompt, onOpenSign, onFind, onEditMine, onAskNotification }: HomeScreenProps) {
+export function HomeScreen({ content, today, mine, mineReady, notificationPrompt, onOpenSign, onFind, onEditMine, onAskNotification, onOpenMatch, onOpenSettings }: HomeScreenProps) {
   const day = skyDay(today);
   const phase = day ? content.phases.find((p) => p.id === day.phase) : undefined;
   const lineFor = (sign: SignId) => (day ? readingFor(content, sign, day).total : signInfo(content, sign).trait);
@@ -106,6 +108,11 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
             />
           );
         })}
+      </List>
+
+      <List style={{ marginTop: 16, marginBottom: 24 }}>
+        <ListRow withArrow onClick={onOpenMatch} contents={<ListRow.Texts type="2RowTypeA" top="별자리 궁합" bottom="두 별자리의 원소 짝과 오늘 하늘로 봐요" />} />
+        <ListRow withArrow onClick={onOpenSettings} contents={<ListRow.Texts type="1RowTypeA" top="설정" />} />
       </List>
     </>
   );
