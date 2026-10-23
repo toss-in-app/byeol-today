@@ -82,6 +82,16 @@ describe('SkyChart', () => {
     expect(still.container.querySelectorAll('.byeol-fade')).toHaveLength(0);
   });
 
+  it('달 고리 맥동은 기본 켬(돌기가 끝난 뒤 시작), pulse=false 면 없음', () => {
+    const { container, unmount } = render(<SkyChart top="leo" moon="pisces" nameOf={nameOf} size={96} />);
+    const echo = container.querySelector('circle.byeol-pulse') as SVGCircleElement;
+    expect(echo).not.toBeNull();
+    expect(echo.style.animationDelay).toBe('1300ms');
+    unmount();
+    const quiet = render(<SkyChart top="leo" moon="pisces" nameOf={nameOf} size={96} pulse={false} />);
+    expect(quiet.container.querySelector('.byeol-pulse')).toBeNull();
+  });
+
   it('칸 누르기: onSelectHouse 가 있으면 12칸이 버튼이고 고른 칸에 테두리', () => {
     const onSelect = vi.fn();
     // 칸 버튼이 읽히려면 svg 자체가 aria-hidden 이 아니어야 해요(label 필수) — ChartSheet 가 그렇게 써요

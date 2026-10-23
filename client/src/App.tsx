@@ -36,6 +36,8 @@ export default function App() {
   const { settings, ready: settingsReady, update: updateSettings } = useSettings();
   const toast = useToast();
   const [adBusy, setAdBusy] = useState(false);
+  // 홈에서 당겨 놓으면 다시 그려요 — 자정을 넘겨 열어 둔 앱이 오늘(kstDateKey)을 다시 읽게
+  const [, setRefreshTick] = useState(0);
   /** 자세히·찾기 화면의 from(분석): 어디서 눌러 들어왔는지. 딥링크로 바로 열렸으면 'link' */
   const signFrom = useRef<'list' | 'mine' | 'link' | 'match'>(atHistoryBottom() && route.name === 'sign' ? 'link' : 'list');
 
@@ -192,6 +194,7 @@ export default function App() {
           onAskNotification={() => void askNotification()}
           onOpenMatch={() => openMatch()}
           onOpenSettings={() => navigate({ name: 'settings' })}
+          onRefresh={() => setRefreshTick((n) => n + 1)}
         />
       );
     case 'sign':

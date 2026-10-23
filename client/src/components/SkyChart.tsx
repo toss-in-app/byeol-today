@@ -22,6 +22,8 @@ export interface SkyChartProps {
   center?: { title?: string; sub?: string };
   /** 뜰 때 움직임(고리가 그려지고 달이 꼭대기에서 제 칸까지 돌아감). 기본 켬, 줄이기 설정이면 CSS 가 끔 */
   animate?: boolean;
+  /** 달 고리의 맥동(천천히 커지며 옅어지는 고리, 반복). 기본 켬 */
+  pulse?: boolean;
   /** 있으면 12칸이 눌러지고(천체도 시트), 고른 칸에 테두리 */
   onSelectHouse?: (house: number) => void;
   selectedHouse?: number;
@@ -40,7 +42,7 @@ const OUTER_LEN = Math.round(2 * Math.PI * R_OUTER);
 const INNER_LEN = Math.round(2 * Math.PI * R_INNER);
 
 /** 천체도 — 12칸 고리 + 눈금 + 달 표시. 자료 계산은 lib/chart(카드와 공유) */
-export function SkyChart({ top, moon, nameOf, size = 120, labels = size >= 200, highlightTop = true, center, animate = true, onSelectHouse, selectedHouse, label, style }: SkyChartProps) {
+export function SkyChart({ top, moon, nameOf, size = 120, labels = size >= 200, highlightTop = true, center, animate = true, pulse = true, onSelectHouse, selectedHouse, label, style }: SkyChartProps) {
   const house = houseOf(top, moon);
   const moonLabel = polar(C, C, R_MOON + 20, houseAngle(house) + 14);
   const a11y = label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true };
@@ -78,6 +80,9 @@ export function SkyChart({ top, moon, nameOf, size = 120, labels = size >= 200, 
       {/* 달: 꼭대기(1번 집)에서 제 칸까지 시계 방향으로 돌아가요 — 그룹을 돌려서 점선·고리·점이 같이 움직임 */}
       <g className={animate ? 'byeol-sweep' : undefined} style={{ transform: `rotate(${houseAngle(house) + 90}deg)`, transformOrigin: `${C}px ${C}px`, animationDelay: animate ? '350ms' : undefined }}>
         <line x1={C} y1={C} x2={C} y2={C - R_MOON} stroke={PAPER.accent} strokeWidth={compact ? 1.8 : 0.9} strokeDasharray={compact ? '3 3' : '2 3'} opacity={0.85} />
+        {pulse ? (
+          <circle className="byeol-pulse" cx={C} cy={C - R_MOON} r={compact ? 14 : 10} fill="none" stroke={PAPER.accent} strokeWidth={compact ? 2 : 1} style={{ animationDelay: animate ? '1300ms' : '0ms' }} />
+        ) : null}
         <circle cx={C} cy={C - R_MOON} r={compact ? 14 : 10} fill="none" stroke={PAPER.accent} strokeWidth={compact ? 2.4 : 1} />
         <circle cx={C} cy={C - R_MOON} r={compact ? 7 : 5} fill={PAPER.ink} />
       </g>
