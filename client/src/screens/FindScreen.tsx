@@ -3,6 +3,7 @@ import { Chip, ChipItem, FixedBottomCTA, List, ListRow, SegmentedControl, Text, 
 import { useState } from 'react';
 
 import { LabelPicker } from '../components/LabelPicker';
+import { SignIcon } from '../components/SignGlyph';
 import { signInfo, type Content } from '../content';
 import { logEvent } from '../lib/analytics';
 import { formatTimeKo } from '../lib/date';
@@ -138,6 +139,7 @@ export function FindScreen({ content, mineCount, onRegister, onDone }: FindScree
                 key={id}
                 onClick={() => setListPick(id)}
                 aria-pressed={picked}
+                left={<SignIcon sign={id} />}
                 contents={<ListRow.Texts type="2RowTypeA" top={sign.name} bottom={sign.dates} />}
                 right={
                   picked ? (

@@ -3,6 +3,7 @@ import { List, ListRow, Text, TextButton, Top, useDialog } from '@toss/tds-mobil
 import type { MouseEvent } from 'react';
 
 import { NotificationPromptRow } from '../components/NotificationPromptRow';
+import { SignIcon } from '../components/SignGlyph';
 import { signInfo, type Content } from '../content';
 import { eulReul } from '../lib/josa';
 import { MAX_MINE, mineTitle, type MineItem } from '../lib/state';
@@ -50,6 +51,7 @@ export function MineScreen({ content, today, items, notificationPrompt, onOpenSi
             <ListRow
               key={item.id}
               onClick={() => onOpenSign(item.sign)}
+              left={<SignIcon sign={item.sign} />}
               contents={<ListRow.Texts type="2RowTypeA" top={mineTitle(item, sign.name)} bottom={line} />}
               right={
                 <TextButton

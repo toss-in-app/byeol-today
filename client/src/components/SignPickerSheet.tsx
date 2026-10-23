@@ -4,6 +4,7 @@ import { BottomSheet, List, ListRow, Text } from '@toss/tds-mobile';
 import { signInfo, type Content } from '../content';
 import { mineTitle, type MineItem } from '../lib/state';
 import { SIGN_IDS, type SignId } from '../sky';
+import { SignIcon } from './SignGlyph';
 
 export interface SignPickerSheetProps {
   content: Content;
@@ -22,6 +23,7 @@ export function SignPickerSheet({ content, open, title, mine, selected, onPick, 
     <ListRow
       key={key}
       onClick={() => onPick(sign)}
+      left={<SignIcon sign={sign} size={36} />}
       contents={<ListRow.Texts type="2RowTypeA" top={top} bottom={bottom} />}
       right={
         selected === sign ? (

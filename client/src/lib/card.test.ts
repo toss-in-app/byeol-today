@@ -11,6 +11,7 @@ describe('card', () => {
     const day = skyDay('2026-10-20')!;
     const layout = layoutCard({ content: bundledContent, sign: 'leo', today: '2026-10-20', day });
     expect(layout.caption).toBe('오늘의 별자리 운세 · 2026년 10월 20일');
+    expect(layout.sign).toBe('leo');
     expect(layout.title).toBe('사자자리');
     expect(layout.sky).toBe('오늘 달은 물병자리에 있어요 · 상현달');
     expect(layout.house).toBe("나의 7번째 집 '짝과 관계'");
@@ -32,10 +33,13 @@ describe('card', () => {
   it('캔버스를 못 쓰면 null (jsdom), 캔버스가 있으면 PNG base64', () => {
     const day = skyDay('2026-10-20')!;
     expect(renderCard({ content: bundledContent, sign: 'leo', today: '2026-10-20', day })).toBeNull();
-    const fakeCtx = { fillRect: vi.fn(), fillText: vi.fn(), measureText: () => ({ width: 10 }), save: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), roundRect: vi.fn(), fill: vi.fn() };
+    const fakeCtx = { fillRect: vi.fn(), fillText: vi.fn(), measureText: () => ({ width: 10 }), save: vi.fn(), restore: vi.fn(), beginPath: vi.fn(), fill: vi.fn(), arc: vi.fn(), moveTo: vi.fn(), lineTo: vi.fn(), stroke: vi.fn() };
     const canvas = { width: 0, height: 0, getContext: () => fakeCtx, toDataURL: () => 'data:image/png;base64,QUJD' };
     const doc = { createElement: () => canvas } as unknown as Document;
     expect(renderCard({ content: bundledContent, sign: 'leo', today: '2026-10-20', day }, doc)).toEqual({ dataUrl: 'data:image/png;base64,QUJD', base64: 'QUJD' });
     expect(fakeCtx.fillText).toHaveBeenCalled();
+    // 밤하늘 별 80 + 사자자리 별 9(가장 밝은 별은 빛 번짐까지 2) = 원 90, 선 9
+    expect(fakeCtx.arc).toHaveBeenCalledTimes(90);
+    expect(fakeCtx.stroke).toHaveBeenCalledTimes(9);
   });
 });
