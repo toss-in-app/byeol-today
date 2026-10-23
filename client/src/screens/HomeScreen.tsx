@@ -3,22 +3,29 @@ import { List, ListHeader, ListRow, Text, Top } from '@toss/tds-mobile';
 
 import { signInfo, type Content } from '../content';
 import { formatDateLabel, formatTimeKo } from '../lib/date';
+import { mineTitle, type MineItem } from '../lib/state';
 import { readingFor, SIGN_IDS, skyDay, type SignId } from '../sky';
 
 export interface HomeScreenProps {
   content: Content;
   /** 한국 날짜 YYYY-MM-DD */
   today: string;
+  /** 내 별자리(등록 순). 저장소를 읽기 전(mineReady=false)에는 찾기 행을 아직 그리지 않아요 */
+  mine: MineItem[];
+  mineReady: boolean;
   onOpenSign: (sign: SignId) => void;
+  onFind: () => void;
+  onEditMine: () => void;
 }
 
 /**
- * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 12별자리 오늘 한 줄.
- * 4단계 골격 — 내 별자리·알림·광고 안내·궁합·설정 행은 5단계 기능과 함께(흐름: steps/3-design/wireframes/byeol-today-flow.md).
+ * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 내 별자리(맨 위) + 12별자리 오늘 한 줄.
+ * 알림 행·광고 안내·궁합·설정 행은 뒤 기능과 함께(흐름: steps/3-design/wireframes/byeol-today-flow.md).
  */
-export function HomeScreen({ content, today, onOpenSign }: HomeScreenProps) {
+export function HomeScreen({ content, today, mine, mineReady, onOpenSign, onFind, onEditMine }: HomeScreenProps) {
   const day = skyDay(today);
   const phase = day ? content.phases.find((p) => p.id === day.phase) : undefined;
+  const lineFor = (sign: SignId) => (day ? readingFor(content, sign, day).total : signInfo(content, sign).trait);
 
   return (
     <>
@@ -49,6 +56,32 @@ export function HomeScreen({ content, today, onOpenSign }: HomeScreenProps) {
         )}
       </section>
 
+      {mineReady ? (
+        <section aria-label="내 별자리">
+          <ListHeader
+            title={
+              <ListHeader.TitleParagraph typography="t5" fontWeight="bold" color={colors.grey800}>
+                내 별자리
+              </ListHeader.TitleParagraph>
+            }
+            right={mine.length > 0 ? <ListHeader.RightText onClick={onEditMine}>편집</ListHeader.RightText> : undefined}
+          />
+          <List>
+            {mine.map((item) => (
+              <ListRow
+                key={item.id}
+                withArrow
+                onClick={() => onOpenSign(item.sign)}
+                contents={<ListRow.Texts type="2RowTypeA" top={mineTitle(item, signInfo(content, item.sign).name)} bottom={lineFor(item.sign)} />}
+              />
+            ))}
+            {mine.length === 0 ? (
+              <ListRow withArrow onClick={onFind} contents={<ListRow.Texts type="2RowTypeA" top="내 별자리 찾기" bottom="생일로 찾거나 목록에서 골라요" />} />
+            ) : null}
+          </List>
+        </section>
+      ) : null}
+
       <ListHeader
         title={
           <ListHeader.TitleParagraph typography="t5" fontWeight="bold" color={colors.grey800}>
@@ -59,13 +92,12 @@ export function HomeScreen({ content, today, onOpenSign }: HomeScreenProps) {
       <List>
         {SIGN_IDS.map((id) => {
           const sign = signInfo(content, id);
-          const line = day ? readingFor(content, id, day).total : sign.trait;
           return (
             <ListRow
               key={id}
               withArrow
               onClick={() => onOpenSign(id)}
-              contents={<ListRow.Texts type="2RowTypeA" top={`${sign.name} · ${sign.dates}`} bottom={line} />}
+              contents={<ListRow.Texts type="2RowTypeA" top={`${sign.name} · ${sign.dates}`} bottom={lineFor(id)} />}
             />
           );
         })}
