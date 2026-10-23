@@ -12,7 +12,7 @@ import { useMine } from './hooks/useMine';
 import { useSettings } from './hooks/useSettings';
 import { useSky } from './hooks/useSky';
 import { APP_DEEP_LINK, canSaveImage, createShareLink, saveImageToPhotos, shareText } from './lib/bridge';
-import { cardFileName, renderCard } from './lib/card';
+import { cardFileName, layoutCard, prepareCardFonts, renderCard } from './lib/card';
 import { kstDateKey } from './lib/date';
 import { isMatchDetailUnlocked, matchFor, withMatchDetailUnlocked } from './lib/match';
 import { atHistoryBottom, goBack, navigate, useRoute } from './lib/router';
@@ -141,6 +141,8 @@ export default function App() {
   const saveCard = async (sign: SignId) => {
     const day = skyDay(today);
     if (!day) return;
+    // 세리프(차트 글자·이름)를 먼저 읽고 그려요. 1.5초 안에 안 되면 고딕으로
+    await prepareCardFonts(layoutCard({ content, sign, today, day }));
     const card = renderCard({ content, sign, today, day });
     if (!card) {
       logEvent('card_save', { sign, result: 'error' });

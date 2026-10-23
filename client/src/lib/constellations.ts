@@ -1,7 +1,7 @@
 /**
- * 별자리 선 그림 자료(비주얼 '밤 별자리', steps/3-design/wireframes/byeol-today-visual-v2.md '결정').
+ * 별자리 선 그림 자료(steps/3-design/wireframes/byeol-today-visual-v2.md — 2026-10-23 '천체도' 채택, 선 그림은 목록 아이콘에 잉크 톤으로 유지).
  * 12별자리의 밝은 별 4~13개를 실제 적경·적위에서 옮겨 100×100 칸에 맞췄어요(북쪽 위·동쪽 왼쪽 = 남쪽 하늘을 올려다본 모습).
- * 화면 SVG(components/SignGlyph)와 공유 카드 캔버스(lib/card)가 같은 자료를 써요. 심벌(♈ 류)은 쓰지 않아요.
+ * 화면 SVG(components/SignGlyph)가 이 자료를 써요(톤: ink 종이 위 / night 어두운 바탕 위). 심벌(♈ 류)은 쓰지 않아요.
  *  - star: [x, y, 밝기] — 밝기 3 = 그 별자리에서 가장 밝은 별(금색), 2 = 밝은 별, 1 = 보통, 0 = 아주 작은 점(플레이아데스)
  *  - line: 별 번호 쌍
  */

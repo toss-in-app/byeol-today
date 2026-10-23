@@ -5,12 +5,13 @@ import { useState } from 'react';
 import { AD_MESSAGES } from '../ads/rules';
 import { AdMark } from '../components/AdMark';
 import { MoonIcon } from '../components/MoonIcon';
-import { NightBlock } from '../components/NightBlock';
 import { NotificationPromptRow } from '../components/NotificationPromptRow';
-import { SignGlyph, SignIcon } from '../components/SignGlyph';
+import { PaperBlock } from '../components/PaperBlock';
+import { SignIcon } from '../components/SignGlyph';
+import { SkyChart } from '../components/SkyChart';
 import { SkyInfoSheet } from '../components/SkyInfoSheet';
 import { signInfo, type Content } from '../content';
-import { NIGHT } from '../lib/constellations';
+import { PAPER } from '../lib/chart';
 import { formatDateLabel, formatTimeKo } from '../lib/date';
 import { mineTitle, type MineItem } from '../lib/state';
 import { readingFor, SIGN_IDS, skyDay, type SignId } from '../sky';
@@ -68,39 +69,39 @@ export function HomeScreen({
         subtitleBottom={<Top.SubtitleParagraph size={17}>{formatDateLabel(today)}</Top.SubtitleParagraph>}
       />
 
-      {/* 밤하늘 블록(비주얼 '밤 별자리'): 오늘 달의 별자리 선 그림 + 달 모양. 앱의 나머지는 TDS 라이트 그대로 */}
-      <NightBlock aria-label="오늘 하늘" style={{ margin: '0 20px 12px', padding: '18px 18px 12px' }}>
+      {/* 종이 블록(비주얼 '천체도'): 12칸 고리에 오늘 달의 자리 + 달 모양. 앱의 나머지는 TDS 라이트 그대로 */}
+      <PaperBlock aria-label="오늘 하늘" style={{ margin: '0 20px 12px', padding: '16px 18px 10px' }}>
         {day ? (
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ minWidth: 0 }}>
-              <Text display="block" typography="t5" fontWeight="bold" color={NIGHT.star}>
+              <Text display="block" typography="t5" fontWeight="bold" color={PAPER.ink}>
                 오늘 달은 {signInfo(content, day.moon).name}에 있어요
               </Text>
-              <Text display="block" typography="t6" color={NIGHT.muted} style={{ marginTop: 4 }}>
+              <Text display="block" typography="t6" color={PAPER.muted} style={{ marginTop: 4 }}>
                 {phase?.name ?? ''} · 밝기 {day.illumination}%
               </Text>
               {day.nextSign && day.changeAt ? (
-                <Text display="block" typography="t7" color={NIGHT.muted} style={{ marginTop: 4 }}>
+                <Text display="block" typography="t7" color={PAPER.muted} style={{ marginTop: 4 }}>
                   {formatTimeKo(day.changeAt)}부터 {signInfo(content, day.nextSign).name}
                 </Text>
               ) : null}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 'none' }}>
-              <SignGlyph sign={day.moon} size={52} />
-              <MoonIcon illumination={day.illumination} phase={day.phase} size={34} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 'none' }}>
+              <SkyChart top="aries" moon={day.moon} nameOf={(id) => signInfo(content, id).name} size={68} highlightTop={false} />
+              <MoonIcon illumination={day.illumination} phase={day.phase} size={30} />
             </div>
           </div>
         ) : (
-          <Text display="block" typography="t6" color={NIGHT.star}>
+          <Text display="block" typography="t6" color={PAPER.ink}>
             오늘 하늘 정보가 아직 없어요. 앱을 업데이트해 주세요.
           </Text>
         )}
-        <div style={{ marginTop: 6 }}>
-          <TextButton size="small" color={NIGHT.gold} onClick={() => setSkyOpen(true)}>
+        <div style={{ marginTop: 4 }}>
+          <TextButton size="small" color={PAPER.accent} onClick={() => setSkyOpen(true)}>
             오늘 하늘이란? ›
           </TextButton>
         </div>
-      </NightBlock>
+      </PaperBlock>
       {content.notice ? (
         <Text display="block" typography="t7" color={colors.grey700} style={{ margin: '0 24px 12px' }} role="status">
           {content.notice}

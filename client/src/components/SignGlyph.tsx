@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 
+import { PAPER } from '../lib/chart';
 import { CONSTELLATIONS, NIGHT, starRadiusPx } from '../lib/constellations';
 import type { SignId } from '../sky';
 
@@ -7,20 +8,20 @@ export interface SignGlyphProps {
   sign: SignId;
   /** 한 변(px) */
   size?: number;
-  /** night = 어두운 바탕 위(기본), ink = 흰 바탕 위 */
-  tone?: 'night' | 'ink';
+  /** ink = 종이 위 잉크(기본, 비주얼 '천체도'), night = 어두운 바탕 위 */
+  tone?: 'ink' | 'night';
   /** 있으면 role="img" 로 읽히고, 없으면 꾸밈(aria-hidden) */
   label?: string;
   style?: CSSProperties;
 }
 
 const TONES = {
+  ink: { star: PAPER.ink, line: PAPER.inkSoft, bright: PAPER.accent, glow: PAPER.accentSoft },
   night: { star: NIGHT.star, line: 'rgba(232, 197, 106, 0.8)', bright: NIGHT.gold, glow: 'rgba(232, 197, 106, 0.22)' },
-  ink: { star: NIGHT.sky, line: 'rgba(11, 16, 38, 0.5)', bright: '#9A7B2E', glow: 'rgba(154, 123, 46, 0.18)' },
 } as const;
 
 /** 별자리 선 그림(SVG). 자료는 lib/constellations, 카드(lib/card)도 같은 자료로 그려요 */
-export function SignGlyph({ sign, size = 40, tone = 'night', label, style }: SignGlyphProps) {
+export function SignGlyph({ sign, size = 40, tone = 'ink', label, style }: SignGlyphProps) {
   const { stars, lines } = CONSTELLATIONS[sign];
   const t = TONES[tone];
   const unit = 100 / size; // px → viewBox 단위
@@ -46,10 +47,13 @@ export function SignGlyph({ sign, size = 40, tone = 'night', label, style }: Sig
   );
 }
 
-/** 목록 왼쪽용: 남색 원 안의 선 그림(꾸밈 — 이름은 옆 글에 있어요) */
+/** 목록 왼쪽용: 종이색 원(가는 잉크 테두리) 안의 선 그림(꾸밈 — 이름은 옆 글에 있어요) */
 export function SignIcon({ sign, size = 40 }: { sign: SignId; size?: number }) {
   return (
-    <span aria-hidden style={{ display: 'inline-flex', width: size, height: size, borderRadius: '50%', background: NIGHT.sky, alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+    <span
+      aria-hidden
+      style={{ display: 'inline-flex', boxSizing: 'border-box', width: size, height: size, borderRadius: '50%', background: PAPER.paper, border: '1px solid rgba(31, 35, 64, 0.22)', alignItems: 'center', justifyContent: 'center', flex: 'none' }}
+    >
       <SignGlyph sign={sign} size={Math.round(size * 0.68)} />
     </span>
   );
