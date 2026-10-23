@@ -12,6 +12,7 @@ const ME: MineItem = { id: 'aaaaaaaaaaaaaaaa', sign: 'aquarius', label: '나', a
 function renderMatch(props: { mine?: MineItem[]; initialA?: SignId; initialB?: SignId; unlocked?: boolean; adsFree?: boolean } = {}) {
   const onUnlockDetail = vi.fn(async () => true);
   const isDetailUnlocked = vi.fn(() => props.unlocked ?? false);
+  const onShareLink = vi.fn(async () => {});
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
       <MatchScreen
@@ -23,10 +24,11 @@ function renderMatch(props: { mine?: MineItem[]; initialA?: SignId; initialB?: S
         isDetailUnlocked={isDetailUnlocked}
         onUnlockDetail={onUnlockDetail}
         adsFree={props.adsFree ?? false}
+        onShareLink={onShareLink}
       />
     </TDSMobileAITProvider>,
   );
-  return { onUnlockDetail, isDetailUnlocked };
+  return { onUnlockDetail, isDetailUnlocked, onShareLink };
 }
 
 describe('MatchScreen', () => {
@@ -64,6 +66,12 @@ describe('MatchScreen', () => {
     expect(screen.getByText('두 별자리를 골라 주세요.')).toBeInTheDocument();
   });
 
+  it('링크로 궁합 보내기는 두 별자리로', async () => {
+    const { onShareLink } = renderMatch({ initialA: 'taurus', initialB: 'scorpio' });
+    fireEvent.click(screen.getByRole('button', { name: '링크로 궁합 보내기' }));
+    await waitFor(() => expect(onShareLink).toHaveBeenCalledWith('taurus', 'scorpio'));
+  });
+
   it('광고 없이 여는 중이면 AD 표시와 광고 안내가 빠져요', () => {
     renderMatch({ initialA: 'taurus', initialB: 'scorpio', adsFree: true });
     const button = screen.getByRole('button', { name: '궁합 자세히' });
@@ -72,7 +80,7 @@ describe('MatchScreen', () => {
   });
 
   it('내 별자리가 저장소에서 늦게 와도 첫 자리에 채워요', () => {
-    const props = { content: bundledContent, today: '2026-10-20', isDetailUnlocked: () => false, onUnlockDetail: async () => true, adsFree: false };
+    const props = { content: bundledContent, today: '2026-10-20', isDetailUnlocked: () => false, onUnlockDetail: async () => true, adsFree: false, onShareLink: async () => {} };
     const { rerender } = render(
       <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
         <MatchScreen {...props} mine={[]} />

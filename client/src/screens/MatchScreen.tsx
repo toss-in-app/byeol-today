@@ -22,16 +22,19 @@ export interface MatchScreenProps {
   onUnlockDetail: (a: SignId, b: SignId) => Promise<boolean>;
   /** 광고 없이 여는 중(스위치 off)이면 AD 표시·'광고를 보면' 안내를 빼요 */
   adsFree: boolean;
+  /** '링크로 궁합 보내기' — 받은 사람은 `/match?a=&b=` 로 이 결과(요약)를 봐요 */
+  onShareLink: (a: SignId, b: SignId) => Promise<void>;
 }
 
 type Side = 'a' | 'b';
 
 /** 별자리 궁합(주요 기능 3): 두 별자리 고르기 → 원소 짝 요약 + 오늘 달 원소 한 줄 → 자세히(리워드). 링크 보내기는 ⑦ */
-export function MatchScreen({ content, today, mine, initialA, initialB, isDetailUnlocked, onUnlockDetail, adsFree }: MatchScreenProps) {
+export function MatchScreen({ content, today, mine, initialA, initialB, isDetailUnlocked, onUnlockDetail, adsFree, onShareLink }: MatchScreenProps) {
   const [a, setA] = useState<SignId | null>(initialA ?? mine[0]?.sign ?? null);
   const [b, setB] = useState<SignId | null>(initialB ?? null);
   const [picking, setPicking] = useState<Side | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const day = skyDay(today);
   // 내 별자리는 저장소에서 늦게 오니, 사용자가 아직 아무것도 안 골랐으면 그때 첫 번째를 채워요
   const touched = useRef(false);
@@ -57,6 +60,16 @@ export function MatchScreen({ content, today, mine, initialA, initialB, isDetail
       await onUnlockDetail(a, b);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const share = async () => {
+    if (!a || !b || sharing) return;
+    setSharing(true);
+    try {
+      await onShareLink(a, b);
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -112,6 +125,11 @@ export function MatchScreen({ content, today, mine, initialA, initialB, isDetail
                 </Text>
               </>
             )}
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <Button display="block" size="large" color="dark" variant="weak" loading={sharing} onClick={() => void share()}>
+              링크로 궁합 보내기
+            </Button>
           </div>
         </section>
       ) : (

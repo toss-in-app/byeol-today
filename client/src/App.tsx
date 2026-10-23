@@ -5,13 +5,16 @@ import { AD_GROUPS, fullScreenAdsEnabled } from './ads/config';
 import { AD_MESSAGES, interstitialEligible } from './ads/rules';
 import { useInterstitial } from './ads/useInterstitial';
 import { useRewardedAd } from './ads/useRewardedAd';
-import { bundledContent } from './content';
+import { bundledContent, OG_IMAGE_URL, signInfo } from './content';
 import { useMine } from './hooks/useMine';
 import { useSettings } from './hooks/useSettings';
+import { APP_DEEP_LINK, canSaveImage, createShareLink, saveImageToPhotos, shareText } from './lib/bridge';
+import { cardFileName, renderCard } from './lib/card';
 import { kstDateKey } from './lib/date';
-import { isMatchDetailUnlocked, withMatchDetailUnlocked } from './lib/match';
+import { isMatchDetailUnlocked, matchFor, withMatchDetailUnlocked } from './lib/match';
 import { goBack, navigate, useRoute } from './lib/router';
 import { isTomorrowUnlocked, withTomorrowUnlocked } from './lib/tomorrow';
+import { readingFor, skyDay } from './sky';
 import { AGREEMENT_MESSAGES, ALREADY_AGREED_HINT, notificationAvailable, requestNotificationAgreement } from './notification/agreement';
 import { FindScreen } from './screens/FindScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -80,6 +83,54 @@ export default function App() {
     return false;
   };
 
+  /*
+   * 공유 (계약 events.md '공유'): 링크는 Share.createLink(별자리 id 만 실어요) → 토스 공유 시트. 카드는 캔버스 PNG → 사진첩(누른 뒤에만 권한).
+   */
+  const SHARE_MESSAGES = {
+    noLink: '링크를 만들지 못했어요. 잠시 뒤에 다시 해 주세요',
+    copied: '링크를 복사했어요',
+    shareFailed: '공유하지 못했어요. 잠시 뒤에 다시 해 주세요',
+    saved: '오늘 카드를 사진첩에 저장했어요',
+    denied: '사진 접근을 허용하면 카드를 저장할 수 있어요',
+    saveFailed: '카드를 저장하지 못했어요. 잠시 뒤에 다시 해 주세요',
+  } as const;
+
+  const sendShare = async (path: string, message: string) => {
+    const link = await createShareLink(path, OG_IMAGE_URL);
+    if (!link) {
+      toast.openToast(SHARE_MESSAGES.noLink);
+      return;
+    }
+    const result = await shareText(`${message}\n${link}`);
+    if (result === 'copied') toast.openToast(SHARE_MESSAGES.copied);
+    else if (result === 'failed') toast.openToast(SHARE_MESSAGES.shareFailed);
+  };
+
+  const shareSign = async (sign: SignId) => {
+    const day = skyDay(today);
+    const name = signInfo(content, sign).name;
+    const line = day ? readingFor(content, sign, day).total : signInfo(content, sign).trait;
+    await sendShare(`${APP_DEEP_LINK}/sign/${sign}`, `[오늘의 별자리 운세] ${name}\n${line}`);
+  };
+
+  const shareMatch = async (a: SignId, b: SignId) => {
+    const summary = matchFor(content, a, b).summary;
+    await sendShare(`${APP_DEEP_LINK}/match?a=${a}&b=${b}`, `[오늘의 별자리 운세] ${signInfo(content, a).name} × ${signInfo(content, b).name} 궁합\n${summary}`);
+  };
+
+  const saveCard = async (sign: SignId) => {
+    const day = skyDay(today);
+    if (!day) return;
+    const card = renderCard({ content, sign, today, day });
+    if (!card) {
+      toast.openToast(SHARE_MESSAGES.saveFailed);
+      return;
+    }
+    const result = await saveImageToPhotos(card.base64, cardFileName(sign, today));
+    toast.openToast(result === 'saved' ? SHARE_MESSAGES.saved : result === 'denied' ? SHARE_MESSAGES.denied : SHARE_MESSAGES.saveFailed);
+  };
+  const saveSupported = canSaveImage();
+
   /** 알림 행은 내 별자리가 있고, 아직 묻지 않았고, 이 토스앱이 지원할 때만. 거부했으면 설정에서만 다시 */
   const notificationReady = notificationAvailable();
   const notificationPrompt = settingsReady && settings.notification === 'unknown' && notificationReady;
@@ -132,6 +183,8 @@ export default function App() {
           onUnlockTomorrow={() => unlockTomorrow(route.sign)}
           adsFree={adsFree}
           bannerAdGroupId={AD_GROUPS.bannerSign || null}
+          onShareLink={() => shareSign(route.sign)}
+          onSaveCard={saveSupported ? () => saveCard(route.sign) : null}
         />
       );
     case 'find':
@@ -161,6 +214,7 @@ export default function App() {
           isDetailUnlocked={(a, b) => isMatchDetailUnlocked(settings, today, a, b)}
           onUnlockDetail={unlockMatchDetail}
           adsFree={adsFree}
+          onShareLink={shareMatch}
         />
       );
     case 'settings':

@@ -30,6 +30,9 @@ export interface SignScreenProps {
   adsFree: boolean;
   /** 맨 아래 배너(banner-sign). null 이면 자리 없음 */
   bannerAdGroupId: string | null;
+  /** 공유: 링크 보내기 · 오늘 카드 이미지 저장(토스앱이 저장을 지원할 때만 버튼) */
+  onShareLink: () => Promise<void>;
+  onSaveCard: (() => Promise<void>) | null;
 }
 
 function ReadingRows({ reading }: { reading: Reading }) {
@@ -48,7 +51,21 @@ function ReadingRows({ reading }: { reading: Reading }) {
  * 별자리 자세히 — 오늘 하늘 근거·영역 4·달 모양 + 내 별자리로 등록(이름표 시트) + 궁합 보기 + 내일 운세 미리 보기(리워드) + 맨 아래 배너.
  * 광고를 띄우는 버튼에는 AD 표시와 '광고를 보면 …' 안내가 항상 같이 있어요(mandalartplan 3.0.1 반려 교훈 — 재시도도 같은 버튼). 공유·카드 저장은 ⑦.
  */
-export function SignScreen({ content, today, sign, inMine, mineCount, onRegister, onOpenMatch, tomorrowUnlocked, onUnlockTomorrow, adsFree, bannerAdGroupId }: SignScreenProps) {
+export function SignScreen({
+  content,
+  today,
+  sign,
+  inMine,
+  mineCount,
+  onRegister,
+  onOpenMatch,
+  tomorrowUnlocked,
+  onUnlockTomorrow,
+  adsFree,
+  bannerAdGroupId,
+  onShareLink,
+  onSaveCard,
+}: SignScreenProps) {
   const info = signInfo(content, sign);
   const day = skyDay(today);
   const tomorrow = tomorrowReading(content, sign, today);
@@ -56,8 +73,20 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
   const [label, setLabel] = useState<LabelChoice>(() => defaultLabel(mineCount));
   const [saving, setSaving] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [sharing, setSharing] = useState<'link' | 'card' | null>(null);
   const { openAlert } = useDialog();
   const toast = useToast();
+
+  const share = async (kind: 'link' | 'card') => {
+    if (sharing) return;
+    setSharing(kind);
+    try {
+      if (kind === 'link') await onShareLink();
+      else if (onSaveCard) await onSaveCard();
+    } finally {
+      setSharing(null);
+    }
+  };
 
   const openSheet = async () => {
     if (mineCount >= MAX_MINE) {
@@ -113,6 +142,18 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
           궁합 보기
         </Button>
       </div>
+      {day ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 20px 16px' }}>
+          {onSaveCard ? (
+            <Button size="medium" color="dark" variant="weak" loading={sharing === 'card'} disabled={sharing !== null} onClick={() => void share('card')}>
+              카드 저장
+            </Button>
+          ) : null}
+          <Button size="medium" color="dark" variant="weak" loading={sharing === 'link'} disabled={sharing !== null} onClick={() => void share('link')}>
+            링크 공유
+          </Button>
+        </div>
+      ) : null}
 
       {day ? (
         (() => {

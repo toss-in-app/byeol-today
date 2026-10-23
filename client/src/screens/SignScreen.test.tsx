@@ -1,5 +1,5 @@
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { bundledContent } from '../content';
@@ -10,8 +10,10 @@ const OK: AddMineResult = { ok: true, state: { version: 1, items: [] }, item: { 
 
 const onOpenMatch = vi.fn();
 const onUnlockTomorrow = vi.fn(async () => {});
+const onShareLink = vi.fn(async () => {});
+const onSaveCard = vi.fn(async () => {});
 
-function renderSign(inMine = false, mineCount = 1, result: AddMineResult = OK, extra: { tomorrowUnlocked?: boolean; adsFree?: boolean; today?: string } = {}) {
+function renderSign(inMine = false, mineCount = 1, result: AddMineResult = OK, extra: { tomorrowUnlocked?: boolean; adsFree?: boolean; today?: string; noSave?: boolean } = {}) {
   const onRegister = vi.fn(async () => result);
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
@@ -27,6 +29,8 @@ function renderSign(inMine = false, mineCount = 1, result: AddMineResult = OK, e
         onUnlockTomorrow={onUnlockTomorrow}
         adsFree={extra.adsFree ?? false}
         bannerAdGroupId={null}
+        onShareLink={onShareLink}
+        onSaveCard={extra.noSave ? null : onSaveCard}
       />
     </TDSMobileAITProvider>,
   );
@@ -78,6 +82,18 @@ describe('SignScreen — 내 별자리로 등록', () => {
     const button = screen.getByRole('button', { name: '내일 운세 미리 보기' });
     expect(button).not.toHaveTextContent('AD');
     expect(screen.getByText('사자자리의 내일 운세를 오늘 하루 볼 수 있어요.')).toBeInTheDocument();
+  });
+
+  it('카드 저장·링크 공유 버튼, 저장 미지원이면 저장 버튼 없음', async () => {
+    renderSign();
+    fireEvent.click(screen.getByRole('button', { name: '링크 공유' }));
+    await waitFor(() => expect(onShareLink).toHaveBeenCalled());
+    fireEvent.click(screen.getByRole('button', { name: '카드 저장' }));
+    await waitFor(() => expect(onSaveCard).toHaveBeenCalled());
+    cleanup();
+    renderSign(false, 1, OK, { noSave: true });
+    expect(screen.queryByRole('button', { name: '카드 저장' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '링크 공유' })).toBeInTheDocument();
   });
 
   it('표 끝이면 내일 운세 구역이 없어요', () => {
