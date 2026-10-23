@@ -63,11 +63,12 @@ export function FindScreen({ content, mineCount, onRegister, onDone }: FindScree
     }
     setSaving(true);
     const result = await onRegister(selected, labelOf(label));
-    setSaving(false);
     if (!result.ok) {
+      setSaving(false);
       await openAlert({ title: FULL_TITLE, description: FULL_DESCRIPTION });
       return;
     }
+    // 성공하면 버튼은 잠근 채로 이전 화면으로 — 화면이 남아 있는 잠깐 사이 두 번 등록되지 않게
     toast.openToast(`${name(selected)}를 내 별자리로 등록했어요`);
     onDone();
   };

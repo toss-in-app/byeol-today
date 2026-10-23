@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseRoute, resolveHash, routeFromSchemeUrl, routeToHash, type Route } from './router';
+import { goBack, navigate, parseRoute, resolveHash, routeFromSchemeUrl, routeToHash, type Route } from './router';
 
 describe('router', () => {
   it('해시 ↔ 화면', () => {
@@ -33,5 +33,20 @@ describe('router', () => {
   it('히스토리 바닥은 딥링크 화면', () => {
     expect(resolveHash('', { name: 'mine' })).toEqual({ name: 'mine' });
     expect(resolveHash('#/find', { name: 'mine' })).toEqual({ name: 'find' });
+  });
+
+  it('바닥인데 해시가 있으면(바로 열었거나 새로고침) 뒤로가기는 홈을 한 칸 쌓아요', () => {
+    window.history.replaceState(null, '', '#/find');
+    goBack();
+    expect(window.location.hash).toBe('#/');
+    expect((window.history.state as { depth?: number } | null)?.depth).toBe(1);
+  });
+
+  it('쌓은 화면은 pushState 로만, 같은 해시면 다시 쌓지 않아요', () => {
+    window.history.replaceState(null, '', '#/');
+    navigate({ name: 'find' });
+    navigate({ name: 'find' });
+    expect(window.location.hash).toBe('#/find');
+    expect((window.history.state as { depth?: number } | null)?.depth).toBe(1);
   });
 });

@@ -112,13 +112,21 @@ export function navigate(route: Route): void {
   emit();
 }
 
-/** 이전 화면으로. 히스토리 바닥(딥링크로 바로 들어온 화면)이면 URL 은 그대로 두고 홈을 그려요. */
+/**
+ * 이전 화면으로. 히스토리 바닥(딥링크로 바로 들어온 화면)이면 URL 은 그대로 두고 홈을 그려요.
+ * 바닥인데 해시가 있으면(개발 중 `#/find` 로 바로 열었거나 그 화면에서 새로고침) 홈을 한 칸 쌓아요 — replaceState 는 쓰지 않아요.
+ */
 export function goBack(): void {
   if (currentDepth() > 0) {
     window.history.back();
     return;
   }
   baseRoute = HOME;
+  const hash = window.location.hash;
+  if (hash && hash !== '#' && hash !== '#/') {
+    navigate(HOME);
+    return;
+  }
   emit();
 }
 
