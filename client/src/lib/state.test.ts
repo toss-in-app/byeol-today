@@ -44,6 +44,16 @@ describe('addMine · removeMine', () => {
     expect(removeMine(state, 'cccccccccccccc0c').items).toHaveLength(4);
   });
 
+  it('저장량: 가장 긴 이름표로 5개를 채워도 1KB 안(Storage 상한과 무관)', () => {
+    let state = empty;
+    for (let i = 0; i < 5; i += 1) {
+      const r = addMine(state, 'sagittarius', '우리 막내 동생', 1792732910097 + i, `dddddddddddddd${i}d`);
+      if (r.ok) state = r.state;
+    }
+    expect(state.items).toHaveLength(5);
+    expect(new TextEncoder().encode(JSON.stringify(state)).length).toBeLessThan(1024);
+  });
+
   it('이름표 8자 제한, 제목 표기', () => {
     expect(normalizeLabel('우리 막내 동생의 별')).toBe('우리 막내 동생'); // 공백 포함 8자
     expect(mineTitle(typed('abcdefgh', 'leo', '엄마'), '사자자리')).toBe('엄마 · 사자자리');
