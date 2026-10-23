@@ -89,6 +89,13 @@ describe('HomeScreen', () => {
     expect(screen.queryByText('매일 아침 8시 운세 알림 받기')).not.toBeInTheDocument();
   });
 
+  it("'오늘 하늘이란?'을 누르면 설명 시트", async () => {
+    renderHome('2026-10-20');
+    fireEvent.click(screen.getByText('오늘 하늘이란? ›'));
+    expect(await screen.findByText(bundledContent.sky.intro)).toBeInTheDocument();
+    expect(screen.getByText(/2028\.12\.31까지 들어 있어요/)).toBeInTheDocument();
+  });
+
   it('맨 아래 궁합·설정 행', () => {
     const { onOpenMatch, onOpenSettings } = renderHome('2026-10-20');
     fireEvent.click(screen.getByText('별자리 궁합'));

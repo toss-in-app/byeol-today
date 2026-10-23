@@ -1,7 +1,9 @@
 import { colors } from '@toss/tds-colors';
-import { List, ListHeader, ListRow, Text, Top } from '@toss/tds-mobile';
+import { List, ListHeader, ListRow, Text, TextButton, Top } from '@toss/tds-mobile';
+import { useState } from 'react';
 
 import { NotificationPromptRow } from '../components/NotificationPromptRow';
+import { SkyInfoSheet } from '../components/SkyInfoSheet';
 import { signInfo, type Content } from '../content';
 import { formatDateLabel, formatTimeKo } from '../lib/date';
 import { mineTitle, type MineItem } from '../lib/state';
@@ -32,6 +34,7 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
   const day = skyDay(today);
   const phase = day ? content.phases.find((p) => p.id === day.phase) : undefined;
   const lineFor = (sign: SignId) => (day ? readingFor(content, sign, day).total : signInfo(content, sign).trait);
+  const [skyOpen, setSkyOpen] = useState(false);
 
   return (
     <>
@@ -60,7 +63,13 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
             오늘 하늘 정보가 아직 없어요. 앱을 업데이트해 주세요.
           </Text>
         )}
+        <div style={{ marginTop: 8 }}>
+          <TextButton size="small" color={colors.grey600} onClick={() => setSkyOpen(true)}>
+            오늘 하늘이란? ›
+          </TextButton>
+        </div>
       </section>
+      <SkyInfoSheet content={content} open={skyOpen} onClose={() => setSkyOpen(false)} />
 
       {mineReady ? (
         <section aria-label="내 별자리">

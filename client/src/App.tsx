@@ -12,7 +12,7 @@ import { FindScreen } from './screens/FindScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MatchScreen } from './screens/MatchScreen';
 import { MineScreen } from './screens/MineScreen';
-import { PlaceholderScreen } from './screens/PlaceholderScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 import { SignScreen } from './screens/SignScreen';
 import type { SignId } from './sky';
 
@@ -38,7 +38,8 @@ export default function App() {
   };
 
   /** 알림 행은 내 별자리가 있고, 아직 묻지 않았고, 이 토스앱이 지원할 때만. 거부했으면 설정에서만 다시 */
-  const notificationPrompt = settingsReady && settings.notification === 'unknown' && notificationAvailable();
+  const notificationReady = notificationAvailable();
+  const notificationPrompt = settingsReady && settings.notification === 'unknown' && notificationReady;
 
   /** 홈·내 별자리·설정 행을 사용자가 누른 뒤에만 동의 화면. 결과는 settings.notification 에 남겨요 */
   const askNotification = async () => {
@@ -113,6 +114,15 @@ export default function App() {
         />
       );
     case 'settings':
-      return <PlaceholderScreen title="설정" />;
+      return (
+        <SettingsScreen
+          content={content}
+          notification={settings.notification}
+          notificationAvailable={notificationReady}
+          mineCount={mine.items.length}
+          onNotification={() => void askNotification()}
+          onManageMine={() => navigate({ name: 'mine' })}
+        />
+      );
   }
 }
