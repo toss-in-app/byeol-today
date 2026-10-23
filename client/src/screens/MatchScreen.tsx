@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AdMark } from '../components/AdMark';
 import { SignPickerSheet } from '../components/SignPickerSheet';
 import { signInfo, type Content } from '../content';
+import { logEvent } from '../lib/analytics';
 import { elementName, matchFor, todayMatchLine } from '../lib/match';
 import type { MineItem } from '../lib/state';
 import { skyDay, type SignId } from '../sky';
@@ -45,6 +46,11 @@ export function MatchScreen({ content, today, mine, initialA, initialB, isDetail
 
   const result = a && b ? matchFor(content, a, b) : null;
   const unlocked = a && b ? isDetailUnlocked(a, b) : false;
+  const pairKeyForLog = result?.key ?? null;
+  const fromLink = Boolean(initialA && initialB);
+  useEffect(() => {
+    if (pairKeyForLog) logEvent('match_view', { pair: pairKeyForLog, from: fromLink ? 'link' : 'app' });
+  }, [pairKeyForLog, fromLink]);
 
   const pick = (sign: SignId) => {
     touched.current = true;

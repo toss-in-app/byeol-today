@@ -48,7 +48,7 @@ describe('HomeScreen', () => {
   it('별자리를 누르면 자세히로', () => {
     const { onOpenSign } = renderHome('2026-10-20');
     fireEvent.click(screen.getByText('사자자리 · 7월 23일 ~ 8월 22일'));
-    expect(onOpenSign).toHaveBeenCalledWith('leo');
+    expect(onOpenSign).toHaveBeenCalledWith('leo', 'list');
   });
 
   it('표 밖 날짜면 업데이트 안내, 문장 대신 성향', () => {
@@ -72,7 +72,7 @@ describe('HomeScreen', () => {
     expect(screen.getAllByText(bundledContent.readings['7'].total.enter).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText('내 별자리 찾기')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('엄마 · 사자자리'));
-    expect(onOpenSign).toHaveBeenCalledWith('leo');
+    expect(onOpenSign).toHaveBeenCalledWith('leo', 'mine');
     fireEvent.click(screen.getByText('편집'));
     expect(onEditMine).toHaveBeenCalled();
   });

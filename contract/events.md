@@ -16,7 +16,7 @@
 | `notification_prompt_view` | 알림 받기 행이 처음 보일 때 | - |
 | `notification_agree` | 알림 동의 결과 | `result`(agreed/declined/error/unsupported) |
 | `tomorrow_unlock` | 내일 운세 미리 보기 리워드 결과 | `sign`, `result`(rewarded/dismissed/unavailable) |
-| `match_view` | 궁합 결과가 보일 때 | `pair`(예: `air-fire`, 원소 쌍), `from`(app/link) |
+| `match_view` | 궁합 결과가 보일 때 | `pair`(콘텐츠 쌍 키, 예: `fire-air` — 순서는 content.match.pairs 와 같음), `from`(app/link) |
 | `match_detail_unlock` | 궁합 자세히 리워드 결과 | `result`(rewarded/dismissed/unavailable) |
 | `card_save` | 오늘 카드 이미지 저장 | `sign`, `result`(saved/denied/error) |
 | `share_link` | 공유 링크 보냄 | `kind`(sign/match) |

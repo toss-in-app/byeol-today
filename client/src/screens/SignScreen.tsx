@@ -1,11 +1,12 @@
 import { colors } from '@toss/tds-colors';
 import { BottomSheet, Button, List, ListRow, Text, Top, useDialog, useToast } from '@toss/tds-mobile';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AdBanner } from '../components/AdBanner';
 import { AdMark } from '../components/AdMark';
 import { LabelPicker } from '../components/LabelPicker';
 import { signInfo, type Content } from '../content';
+import { logEvent } from '../lib/analytics';
 import { formatDateLabel } from '../lib/date';
 import { eulReul } from '../lib/josa';
 import { defaultLabel, labelOf, type LabelChoice } from '../lib/label';
@@ -33,6 +34,8 @@ export interface SignScreenProps {
   /** 공유: 링크 보내기 · 오늘 카드 이미지 저장(토스앱이 저장을 지원할 때만 버튼) */
   onShareLink: () => Promise<void>;
   onSaveCard: (() => Promise<void>) | null;
+  /** 분석 sign_view 의 from: list(홈 목록)/mine(내 별자리)/link(딥링크)/match */
+  from: 'list' | 'mine' | 'link' | 'match';
 }
 
 function ReadingRows({ reading }: { reading: Reading }) {
@@ -65,10 +68,14 @@ export function SignScreen({
   bannerAdGroupId,
   onShareLink,
   onSaveCard,
+  from,
 }: SignScreenProps) {
   const info = signInfo(content, sign);
   const day = skyDay(today);
   const tomorrow = tomorrowReading(content, sign, today);
+  useEffect(() => {
+    logEvent('sign_view', { sign, house: day ? houseOf(sign, day.moon) : null, from });
+  }, [sign, day, from]);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [label, setLabel] = useState<LabelChoice>(() => defaultLabel(mineCount));
   const [saving, setSaving] = useState(false);

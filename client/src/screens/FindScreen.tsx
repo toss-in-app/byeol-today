@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { LabelPicker } from '../components/LabelPicker';
 import { signInfo, type Content } from '../content';
+import { logEvent } from '../lib/analytics';
 import { formatTimeKo } from '../lib/date';
 import { defaultLabel, labelOf, type LabelChoice } from '../lib/label';
 import { MAX_MINE, type AddMineResult } from '../lib/state';
@@ -62,6 +63,8 @@ export function FindScreen({ content, mineCount, onRegister, onDone }: FindScree
       return;
     }
     setSaving(true);
+    // 생일·해는 보내지 않아요 — 방법과 경계일 여부만(events.md)
+    logEvent('find_result', { method: tab === 'birthday' ? 'birthday' : 'pick', withYear: tab === 'birthday' && y !== undefined, cusp: found?.kind === 'cusp' });
     const result = await onRegister(selected, labelOf(label));
     if (!result.ok) {
       setSaving(false);

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type SignId } from '../sky';
+import { logEvent } from '../lib/analytics';
 import { addMine, EMPTY_MINE, loadMine, removeMine, saveMine, type AddMineResult, type MineItem, type MineState } from '../lib/state';
 
 export interface MineApi {
@@ -41,13 +42,23 @@ export function useMine(): MineApi {
   const add = useCallback(
     async (sign: SignId, label: string | null) => {
       const result = addMine(latest.current, sign, label);
-      if (result.ok) await commit(result.state);
+      if (result.ok) {
+        await commit(result.state);
+        logEvent('mine_add', { sign, count: result.state.items.length });
+      }
       return result;
     },
     [commit],
   );
 
-  const remove = useCallback((id: string) => commit(removeMine(latest.current, id)), [commit]);
+  const remove = useCallback(
+    async (id: string) => {
+      const next = removeMine(latest.current, id);
+      await commit(next);
+      logEvent('mine_remove', { count: next.items.length });
+    },
+    [commit],
+  );
   const has = useCallback((sign: SignId) => state.items.some((item) => item.sign === sign), [state.items]);
 
   return { items: state.items, ready, add, remove, has };

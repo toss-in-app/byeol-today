@@ -2,6 +2,7 @@ import { TossAds, type TossAdsAttachBannerResult } from '@apps-in-toss/web-frame
 import { useEffect, useRef, useState } from 'react';
 
 import { ensureBannerSdk } from '../ads/banner';
+import { logEvent } from '../lib/analytics';
 
 interface AdBannerProps {
   adGroupId: string;
@@ -36,12 +37,15 @@ export function AdBanner({ adGroupId }: AdBannerProps) {
           callbacks: {
             onAdRendered: () => {
               if (!cancelled) setStatus('shown');
+              logEvent('ad_banner', { result: 'rendered' });
             },
             onNoFill: () => {
               if (!cancelled) setStatus('hidden');
+              logEvent('ad_banner', { result: 'nofill' });
             },
             onAdFailedToRender: () => {
               if (!cancelled) setStatus('hidden');
+              logEvent('ad_banner', { result: 'failed' });
             },
           },
         });

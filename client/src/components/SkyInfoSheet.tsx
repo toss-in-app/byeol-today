@@ -1,7 +1,9 @@
 import { colors } from '@toss/tds-colors';
 import { BottomSheet, Text } from '@toss/tds-mobile';
+import { useEffect } from 'react';
 
 import type { Content } from '../content';
+import { logEvent } from '../lib/analytics';
 import { SKY_RANGE } from '../sky';
 
 export interface SkyInfoSheetProps {
@@ -12,6 +14,9 @@ export interface SkyInfoSheetProps {
 
 /** '오늘 하늘이란?' — 콘텐츠의 설명 5개(sky.intro·houses·phase·boundary·basis). 홈 카드와 설정에서 누를 때만 열어요 */
 export function SkyInfoSheet({ content, open, onClose }: SkyInfoSheetProps) {
+  useEffect(() => {
+    if (open) logEvent('sky_info_open');
+  }, [open]);
   const items: [string, string][] = [
     ['오늘 하늘', content.sky.intro],
     ['집', content.sky.houses],

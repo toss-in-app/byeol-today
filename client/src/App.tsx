@@ -1,11 +1,12 @@
 import { useToast } from '@toss/tds-mobile';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { AD_GROUPS, fullScreenAdsEnabled } from './ads/config';
 import { AD_MESSAGES, interstitialEligible } from './ads/rules';
 import { useInterstitial } from './ads/useInterstitial';
 import { useRewardedAd } from './ads/useRewardedAd';
 import { OG_IMAGE_URL, signInfo } from './content';
+import { logEvent, logEventOnce } from './lib/analytics';
 import { useContent } from './hooks/useContent';
 import { useMine } from './hooks/useMine';
 import { useSettings } from './hooks/useSettings';
@@ -14,7 +15,7 @@ import { APP_DEEP_LINK, canSaveImage, createShareLink, saveImageToPhotos, shareT
 import { cardFileName, renderCard } from './lib/card';
 import { kstDateKey } from './lib/date';
 import { isMatchDetailUnlocked, matchFor, withMatchDetailUnlocked } from './lib/match';
-import { goBack, navigate, useRoute } from './lib/router';
+import { atHistoryBottom, goBack, navigate, useRoute } from './lib/router';
 import { isTomorrowUnlocked, withTomorrowUnlocked } from './lib/tomorrow';
 import { readingFor, skyDay } from './sky';
 import { AGREEMENT_MESSAGES, ALREADY_AGREED_HINT, notificationAvailable, requestNotificationAgreement } from './notification/agreement';
@@ -35,10 +36,17 @@ export default function App() {
   const { settings, ready: settingsReady, update: updateSettings } = useSettings();
   const toast = useToast();
   const [adBusy, setAdBusy] = useState(false);
+  /** 자세히·찾기 화면의 from(분석): 어디서 눌러 들어왔는지. 딥링크로 바로 열렸으면 'link' */
+  const signFrom = useRef<'list' | 'mine' | 'link' | 'match'>(atHistoryBottom() && route.name === 'sign' ? 'link' : 'list');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [route]);
+
+  // home_view 는 세션당 1회 — 내 별자리 수를 읽은 뒤에
+  useEffect(() => {
+    if (route.name === 'home' && mine.ready) logEventOnce('home_view', { mine: mine.items.length, from: atHistoryBottom() ? 'direct' : 'link' });
+  }, [route.name, mine.ready, mine.items.length]);
 
   /*
    * 광고 (계약 contract/events.md '광고 그룹'). 전면은 홈·내 별자리에 있는 동안 차례인 날만 미리 불러오고,
@@ -51,23 +59,30 @@ export default function App() {
   const adsFree = !fullScreenAdsEnabled();
 
   /** 홈·내 별자리 행 → 자세히. 전면 광고 차례면(미리 불러온 것만) 보여준 뒤 이동, 없으면 바로 이동 */
-  const openSign = async (sign: SignId) => {
+  const openSign = async (sign: SignId, from: 'list' | 'mine') => {
     if (interstitial.upcoming && !adBusy) {
       setAdBusy(true);
       try {
         const result = await interstitial.show();
+        logEvent('ad_interstitial', { result });
         if (result === 'shown') await updateSettings((current) => ({ ...current, ads: { ...current.ads, lastInterstitialDate: today } }));
       } finally {
         setAdBusy(false);
       }
     }
+    signFrom.current = from;
     navigate({ name: 'sign', sign });
   };
   const openMatch = (a?: SignId) => navigate(a ? { name: 'match', a } : { name: 'match' });
+  const openFind = (from: 'home' | 'mine') => {
+    logEvent('find_open', { from });
+    navigate({ name: 'find' });
+  };
 
   /** 내일 운세 미리 보기: 리워드 광고 → userEarnedReward 일 때만 그날 그 별자리를 열어요 */
   const unlockTomorrow = async (sign: SignId) => {
     const outcome = await tomorrowAd.watch();
+    logEvent('tomorrow_unlock', { sign, result: outcome });
     if (outcome === 'rewarded') {
       await updateSettings((current) => withTomorrowUnlocked(current, today, sign));
       return;
@@ -78,6 +93,7 @@ export default function App() {
   /** 궁합 자세히: 리워드 광고 → 보상이면 그날 그 쌍을 열어요 */
   const unlockMatchDetail = async (a: SignId, b: SignId) => {
     const outcome = await matchAd.watch();
+    logEvent('match_detail_unlock', { result: outcome });
     if (outcome === 'rewarded') {
       await updateSettings((current) => withMatchDetailUnlocked(current, today, a, b));
       return true;
@@ -98,12 +114,13 @@ export default function App() {
     saveFailed: '카드를 저장하지 못했어요. 잠시 뒤에 다시 해 주세요',
   } as const;
 
-  const sendShare = async (path: string, message: string) => {
+  const sendShare = async (kind: 'sign' | 'match', path: string, message: string) => {
     const link = await createShareLink(path, OG_IMAGE_URL);
     if (!link) {
       toast.openToast(SHARE_MESSAGES.noLink);
       return;
     }
+    logEvent('share_link', { kind });
     const result = await shareText(`${message}\n${link}`);
     if (result === 'copied') toast.openToast(SHARE_MESSAGES.copied);
     else if (result === 'failed') toast.openToast(SHARE_MESSAGES.shareFailed);
@@ -113,12 +130,12 @@ export default function App() {
     const day = skyDay(today);
     const name = signInfo(content, sign).name;
     const line = day ? readingFor(content, sign, day).total : signInfo(content, sign).trait;
-    await sendShare(`${APP_DEEP_LINK}/sign/${sign}`, `[오늘의 별자리 운세] ${name}\n${line}`);
+    await sendShare('sign', `${APP_DEEP_LINK}/sign/${sign}`, `[오늘의 별자리 운세] ${name}\n${line}`);
   };
 
   const shareMatch = async (a: SignId, b: SignId) => {
     const summary = matchFor(content, a, b).summary;
-    await sendShare(`${APP_DEEP_LINK}/match?a=${a}&b=${b}`, `[오늘의 별자리 운세] ${signInfo(content, a).name} × ${signInfo(content, b).name} 궁합\n${summary}`);
+    await sendShare('match', `${APP_DEEP_LINK}/match?a=${a}&b=${b}`, `[오늘의 별자리 운세] ${signInfo(content, a).name} × ${signInfo(content, b).name} 궁합\n${summary}`);
   };
 
   const saveCard = async (sign: SignId) => {
@@ -126,10 +143,12 @@ export default function App() {
     if (!day) return;
     const card = renderCard({ content, sign, today, day });
     if (!card) {
+      logEvent('card_save', { sign, result: 'error' });
       toast.openToast(SHARE_MESSAGES.saveFailed);
       return;
     }
     const result = await saveImageToPhotos(card.base64, cardFileName(sign, today));
+    logEvent('card_save', { sign, result: result === 'failed' ? 'error' : result });
     toast.openToast(result === 'saved' ? SHARE_MESSAGES.saved : result === 'denied' ? SHARE_MESSAGES.denied : SHARE_MESSAGES.saveFailed);
   };
   const saveSupported = canSaveImage();
@@ -145,6 +164,7 @@ export default function App() {
       return;
     }
     const result = await requestNotificationAgreement();
+    logEvent('notification_agree', { result: result === 'alreadyAgreed' ? 'agreed' : result === 'failed' ? 'error' : result });
     if (result === 'agreed' || result === 'alreadyAgreed') {
       await updateSettings((current) => ({ ...current, notification: 'agreed' }));
     } else if (result === 'declined') {
@@ -164,8 +184,8 @@ export default function App() {
           notificationPrompt={notificationPrompt}
           interstitialUpcoming={interstitial.upcoming}
           adBusy={adBusy}
-          onOpenSign={(sign) => void openSign(sign)}
-          onFind={() => navigate({ name: 'find' })}
+          onOpenSign={(sign, from) => void openSign(sign, from)}
+          onFind={() => openFind('home')}
           onEditMine={() => navigate({ name: 'mine' })}
           onAskNotification={() => void askNotification()}
           onOpenMatch={() => openMatch()}
@@ -188,6 +208,7 @@ export default function App() {
           bannerAdGroupId={AD_GROUPS.bannerSign || null}
           onShareLink={() => shareSign(route.sign)}
           onSaveCard={saveSupported ? () => saveCard(route.sign) : null}
+          from={signFrom.current}
         />
       );
     case 'find':
@@ -199,8 +220,8 @@ export default function App() {
           today={today}
           items={mine.items}
           notificationPrompt={notificationPrompt}
-          onOpenSign={(sign) => void openSign(sign)}
-          onAdd={() => navigate({ name: 'find' })}
+          onOpenSign={(sign) => void openSign(sign, 'mine')}
+          onAdd={() => openFind('mine')}
           onRemove={mine.remove}
           onAskNotification={() => void askNotification()}
         />

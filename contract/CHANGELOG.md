@@ -12,3 +12,4 @@
 ## v2 — 2026-10-23 (5단계 ⑧ 원격 콘텐츠) [client]
 - `state.schema.json`: Storage 키 2개 추가(선택) — `zodiac.content.v1`(원격 `content.json` 캐시: 마지막으로 물어본 날짜·ETag·본문, 하루 1회 If-None-Match) · `zodiac.sky.v1`(번들 표 범위 밖에 받은 `sky-YYYY.json` 연장분). 기존 키 2개는 그대로.
 - 클라 규칙: 원격 콘텐츠는 `isUsableContent`(모양·`minClientVersion`) 를 통과한 것만 쓰고, 실패·404·형식 오류면 번들 동봉본. 공지(`notice`)는 홈 오늘 하늘 카드 아래 한 줄.
+- `events.md`(⑩): `match_view.pair` 는 콘텐츠 쌍 키 순서(`fire-air`)로 보낸다고 명시. `home_view.from` 은 push 를 따로 알 수 없어 direct/link 만.

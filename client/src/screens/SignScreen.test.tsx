@@ -31,6 +31,7 @@ function renderSign(inMine = false, mineCount = 1, result: AddMineResult = OK, e
         bannerAdGroupId={null}
         onShareLink={onShareLink}
         onSaveCard={extra.noSave ? null : onSaveCard}
+        from="list"
       />
     </TDSMobileAITProvider>,
   );

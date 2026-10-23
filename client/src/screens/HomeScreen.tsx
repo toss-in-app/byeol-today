@@ -24,7 +24,8 @@ export interface HomeScreenProps {
   interstitialUpcoming: boolean;
   /** 전면 광고가 뜨는 동안 행을 잠가요 */
   adBusy: boolean;
-  onOpenSign: (sign: SignId) => void;
+  /** from: 내 별자리 행이면 'mine', 12별자리 목록이면 'list'(분석 sign_view) */
+  onOpenSign: (sign: SignId, from: 'list' | 'mine') => void;
   onFind: () => void;
   onEditMine: () => void;
   onAskNotification: () => void;
@@ -113,7 +114,7 @@ export function HomeScreen({
                 key={item.id}
                 withArrow
                 disabled={adBusy}
-                onClick={() => onOpenSign(item.sign)}
+                onClick={() => onOpenSign(item.sign, 'mine')}
                 contents={<ListRow.Texts type="2RowTypeA" top={mineTitle(item, signInfo(content, item.sign).name)} bottom={lineFor(item.sign)} />}
               />
             ))}
@@ -146,7 +147,7 @@ export function HomeScreen({
               key={id}
               withArrow
               disabled={adBusy}
-              onClick={() => onOpenSign(id)}
+              onClick={() => onOpenSign(id, 'list')}
               contents={<ListRow.Texts type="2RowTypeA" top={`${sign.name} · ${sign.dates}`} bottom={lineFor(id)} />}
             />
           );
