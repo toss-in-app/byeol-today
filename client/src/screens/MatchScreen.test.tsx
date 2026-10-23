@@ -9,12 +9,21 @@ import { MatchScreen } from './MatchScreen';
 
 const ME: MineItem = { id: 'aaaaaaaaaaaaaaaa', sign: 'aquarius', label: '나', addedAt: 1 };
 
-function renderMatch(props: { mine?: MineItem[]; initialA?: SignId; initialB?: SignId; unlocked?: boolean } = {}) {
+function renderMatch(props: { mine?: MineItem[]; initialA?: SignId; initialB?: SignId; unlocked?: boolean; adsFree?: boolean } = {}) {
   const onUnlockDetail = vi.fn(async () => true);
   const isDetailUnlocked = vi.fn(() => props.unlocked ?? false);
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
-      <MatchScreen content={bundledContent} today="2026-10-20" mine={props.mine ?? []} initialA={props.initialA} initialB={props.initialB} isDetailUnlocked={isDetailUnlocked} onUnlockDetail={onUnlockDetail} />
+      <MatchScreen
+        content={bundledContent}
+        today="2026-10-20"
+        mine={props.mine ?? []}
+        initialA={props.initialA}
+        initialB={props.initialB}
+        isDetailUnlocked={isDetailUnlocked}
+        onUnlockDetail={onUnlockDetail}
+        adsFree={props.adsFree ?? false}
+      />
     </TDSMobileAITProvider>,
   );
   return { onUnlockDetail, isDetailUnlocked };
@@ -55,8 +64,15 @@ describe('MatchScreen', () => {
     expect(screen.getByText('두 별자리를 골라 주세요.')).toBeInTheDocument();
   });
 
+  it('광고 없이 여는 중이면 AD 표시와 광고 안내가 빠져요', () => {
+    renderMatch({ initialA: 'taurus', initialB: 'scorpio', adsFree: true });
+    const button = screen.getByRole('button', { name: '궁합 자세히' });
+    expect(button).not.toHaveTextContent('AD');
+    expect(screen.getByText('이 두 별자리의 자세한 글을 오늘 하루 볼 수 있어요.')).toBeInTheDocument();
+  });
+
   it('내 별자리가 저장소에서 늦게 와도 첫 자리에 채워요', () => {
-    const props = { content: bundledContent, today: '2026-10-20', isDetailUnlocked: () => false, onUnlockDetail: async () => true };
+    const props = { content: bundledContent, today: '2026-10-20', isDetailUnlocked: () => false, onUnlockDetail: async () => true, adsFree: false };
     const { rerender } = render(
       <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
         <MatchScreen {...props} mine={[]} />

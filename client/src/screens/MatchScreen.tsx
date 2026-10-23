@@ -2,6 +2,7 @@ import { colors } from '@toss/tds-colors';
 import { Button, Text, Top } from '@toss/tds-mobile';
 import { useEffect, useRef, useState } from 'react';
 
+import { AdMark } from '../components/AdMark';
 import { SignPickerSheet } from '../components/SignPickerSheet';
 import { signInfo, type Content } from '../content';
 import { elementName, matchFor, todayMatchLine } from '../lib/match';
@@ -17,14 +18,16 @@ export interface MatchScreenProps {
   initialB?: SignId;
   /** 그날 리워드로 연 쌍인지 */
   isDetailUnlocked: (a: SignId, b: SignId) => boolean;
-  /** '궁합 자세히' — ⑥에서 리워드 광고를 거쳐요. 열렸으면 true */
+  /** '궁합 자세히' — 리워드 광고(rewarded-match-detail)를 거쳐요. 열렸으면 true */
   onUnlockDetail: (a: SignId, b: SignId) => Promise<boolean>;
+  /** 광고 없이 여는 중(스위치 off)이면 AD 표시·'광고를 보면' 안내를 빼요 */
+  adsFree: boolean;
 }
 
 type Side = 'a' | 'b';
 
 /** 별자리 궁합(주요 기능 3): 두 별자리 고르기 → 원소 짝 요약 + 오늘 달 원소 한 줄 → 자세히(리워드). 링크 보내기는 ⑦ */
-export function MatchScreen({ content, today, mine, initialA, initialB, isDetailUnlocked, onUnlockDetail }: MatchScreenProps) {
+export function MatchScreen({ content, today, mine, initialA, initialB, isDetailUnlocked, onUnlockDetail, adsFree }: MatchScreenProps) {
   const [a, setA] = useState<SignId | null>(initialA ?? mine[0]?.sign ?? null);
   const [b, setB] = useState<SignId | null>(initialB ?? null);
   const [picking, setPicking] = useState<Side | null>(null);
@@ -100,14 +103,12 @@ export function MatchScreen({ content, today, mine, initialA, initialB, isDetail
               </>
             ) : (
               <>
-                <Button display="block" size="large" color="dark" variant="weak" loading={busy} onClick={() => void unlock()} aria-label="광고 보고 궁합 자세히">
-                  <span style={{ display: 'inline-block', padding: '0 5px', marginRight: 6, borderRadius: 4, fontSize: 11, fontWeight: 700, background: colors.grey200, color: colors.grey700 }}>
-                    AD
-                  </span>
+                <Button display="block" size="large" color="dark" variant="weak" loading={busy} onClick={() => void unlock()} aria-label={adsFree ? '궁합 자세히' : '광고 보고 궁합 자세히'}>
+                  {adsFree ? null : <AdMark />}
                   궁합 자세히
                 </Button>
                 <Text display="block" typography="t7" color={colors.grey600} style={{ marginTop: 6 }}>
-                  광고를 한 번 보면 이 두 별자리의 자세한 글이 오늘 하루 열려요.
+                  {adsFree ? '이 두 별자리의 자세한 글을 오늘 하루 볼 수 있어요.' : '광고를 한 번 보면 이 두 별자리의 자세한 글이 오늘 하루 열려요.'}
                 </Text>
               </>
             )}

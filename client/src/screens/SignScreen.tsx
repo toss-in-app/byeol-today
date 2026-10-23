@@ -2,12 +2,16 @@ import { colors } from '@toss/tds-colors';
 import { BottomSheet, Button, List, ListRow, Text, Top, useDialog, useToast } from '@toss/tds-mobile';
 import { useState } from 'react';
 
+import { AdBanner } from '../components/AdBanner';
+import { AdMark } from '../components/AdMark';
 import { LabelPicker } from '../components/LabelPicker';
 import { signInfo, type Content } from '../content';
+import { formatDateLabel } from '../lib/date';
 import { eulReul } from '../lib/josa';
 import { defaultLabel, labelOf, type LabelChoice } from '../lib/label';
 import { MAX_MINE, type AddMineResult } from '../lib/state';
-import { houseOf, readingFor, skyDay, type SignId } from '../sky';
+import { tomorrowReading } from '../lib/tomorrow';
+import { houseOf, readingFor, skyDay, type Reading, type SignId } from '../sky';
 import { FULL_DESCRIPTION, FULL_TITLE } from './FindScreen';
 
 export interface SignScreenProps {
@@ -20,15 +24,38 @@ export interface SignScreenProps {
   onRegister: (sign: SignId, label: string | null) => Promise<AddMineResult>;
   /** 이 별자리를 첫 자리에 넣고 궁합으로 */
   onOpenMatch: () => void;
+  /** 내일 운세(리워드 rewarded-tomorrow): 오늘 이 별자리가 열렸는지 · 열기(광고 → 보상이면 열림) · 광고 없이 여는 중인지(AD 표시·안내 생략) */
+  tomorrowUnlocked: boolean;
+  onUnlockTomorrow: () => Promise<void>;
+  adsFree: boolean;
+  /** 맨 아래 배너(banner-sign). null 이면 자리 없음 */
+  bannerAdGroupId: string | null;
 }
 
-/** 별자리 자세히 — 오늘 하늘 근거·영역 4·달 모양 + 내 별자리로 등록(이름표 시트) + 궁합 보기. 행운·내일 운세(리워드)·공유·배너는 뒤 기능에서 */
-export function SignScreen({ content, today, sign, inMine, mineCount, onRegister, onOpenMatch }: SignScreenProps) {
+function ReadingRows({ reading }: { reading: Reading }) {
+  return (
+    <List>
+      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="총운" bottom={reading.total} />} />
+      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="사랑" bottom={reading.love} />} />
+      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="일" bottom={reading.work} />} />
+      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="돈" bottom={reading.money} />} />
+      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="달 모양" bottom={reading.phaseLine} />} />
+    </List>
+  );
+}
+
+/**
+ * 별자리 자세히 — 오늘 하늘 근거·영역 4·달 모양 + 내 별자리로 등록(이름표 시트) + 궁합 보기 + 내일 운세 미리 보기(리워드) + 맨 아래 배너.
+ * 광고를 띄우는 버튼에는 AD 표시와 '광고를 보면 …' 안내가 항상 같이 있어요(mandalartplan 3.0.1 반려 교훈 — 재시도도 같은 버튼). 공유·카드 저장은 ⑦.
+ */
+export function SignScreen({ content, today, sign, inMine, mineCount, onRegister, onOpenMatch, tomorrowUnlocked, onUnlockTomorrow, adsFree, bannerAdGroupId }: SignScreenProps) {
   const info = signInfo(content, sign);
   const day = skyDay(today);
+  const tomorrow = tomorrowReading(content, sign, today);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [label, setLabel] = useState<LabelChoice>(() => defaultLabel(mineCount));
   const [saving, setSaving] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
   const { openAlert } = useDialog();
   const toast = useToast();
 
@@ -51,6 +78,16 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
       return;
     }
     toast.openToast(`${info.name}를 내 별자리로 등록했어요`);
+  };
+
+  const unlockTomorrow = async () => {
+    if (unlocking) return;
+    setUnlocking(true);
+    try {
+      await onUnlockTomorrow();
+    } finally {
+      setUnlocking(false);
+    }
   };
 
   return (
@@ -76,6 +113,7 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
           궁합 보기
         </Button>
       </div>
+
       {day ? (
         (() => {
           const reading = readingFor(content, sign, day);
@@ -85,13 +123,7 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
               <Text display="block" typography="t6" color={colors.grey800} style={{ margin: '0 20px 8px' }}>
                 오늘 달은 {signInfo(content, day.moon).name}에 있어요. 나의 {reading.house}번째 집 {eulReul(`'${house.theme}'`)} 지나요.
               </Text>
-              <List>
-                <ListRow contents={<ListRow.Texts type="2RowTypeA" top="총운" bottom={reading.total} />} />
-                <ListRow contents={<ListRow.Texts type="2RowTypeA" top="사랑" bottom={reading.love} />} />
-                <ListRow contents={<ListRow.Texts type="2RowTypeA" top="일" bottom={reading.work} />} />
-                <ListRow contents={<ListRow.Texts type="2RowTypeA" top="돈" bottom={reading.money} />} />
-                <ListRow contents={<ListRow.Texts type="2RowTypeA" top="달 모양" bottom={reading.phaseLine} />} />
-              </List>
+              <ReadingRows reading={reading} />
             </>
           );
         })()
@@ -99,6 +131,40 @@ export function SignScreen({ content, today, sign, inMine, mineCount, onRegister
         <Text display="block" typography="t6" color={colors.grey700} style={{ margin: '0 20px' }}>
           오늘 하늘 정보가 아직 없어요. 앱을 업데이트해 주세요.
         </Text>
+      )}
+
+      {tomorrow ? (
+        <section aria-label="내일 운세" style={{ margin: '24px 0 0' }}>
+          <Text display="block" typography="t5" fontWeight="bold" color={colors.grey800} style={{ margin: '0 20px 4px' }}>
+            내일 운세 미리 보기
+          </Text>
+          {tomorrowUnlocked ? (
+            <>
+              <Text display="block" typography="t7" color={colors.grey600} style={{ margin: '0 20px 8px' }}>
+                {formatDateLabel(tomorrow.day.date)} · 달은 {signInfo(content, tomorrow.day.moon).name}에 있어요
+              </Text>
+              <ReadingRows reading={tomorrow.reading} />
+            </>
+          ) : (
+            <div style={{ margin: '8px 20px 0' }}>
+              <Button display="block" size="large" color="dark" variant="weak" loading={unlocking} onClick={() => void unlockTomorrow()} aria-label={adsFree ? '내일 운세 미리 보기' : '광고 보고 내일 운세 미리 보기'}>
+                {adsFree ? null : <AdMark />}
+                내일 운세 미리 보기
+              </Button>
+              <Text display="block" typography="t7" color={colors.grey600} style={{ marginTop: 6 }}>
+                {adsFree ? `${info.name}의 내일 운세를 오늘 하루 볼 수 있어요.` : `광고를 한 번 보면 ${info.name}의 내일 운세가 오늘 하루 열려요.`}
+              </Text>
+            </div>
+          )}
+        </section>
+      ) : null}
+
+      {bannerAdGroupId ? (
+        <div style={{ margin: '32px 0 24px' }}>
+          <AdBanner adGroupId={bannerAdGroupId} />
+        </div>
+      ) : (
+        <div style={{ height: 24 }} />
       )}
 
       <BottomSheet

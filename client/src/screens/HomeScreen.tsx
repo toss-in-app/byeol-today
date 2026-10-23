@@ -2,6 +2,8 @@ import { colors } from '@toss/tds-colors';
 import { List, ListHeader, ListRow, Text, TextButton, Top } from '@toss/tds-mobile';
 import { useState } from 'react';
 
+import { AD_MESSAGES } from '../ads/rules';
+import { AdMark } from '../components/AdMark';
 import { NotificationPromptRow } from '../components/NotificationPromptRow';
 import { SkyInfoSheet } from '../components/SkyInfoSheet';
 import { signInfo, type Content } from '../content';
@@ -18,6 +20,10 @@ export interface HomeScreenProps {
   mineReady: boolean;
   /** 내 별자리를 등록했고 아직 알림을 묻지 않았을 때만 true — 행을 누른 뒤에만 동의 화면 */
   notificationPrompt: boolean;
+  /** 전면 광고 차례인 날(오늘 아직 안 봄·처음 연 날 아님·광고 준비 중/됨): 목록 위 안내 한 줄 + 목록 제목에 AD 표시 */
+  interstitialUpcoming: boolean;
+  /** 전면 광고가 뜨는 동안 행을 잠가요 */
+  adBusy: boolean;
   onOpenSign: (sign: SignId) => void;
   onFind: () => void;
   onEditMine: () => void;
@@ -30,7 +36,21 @@ export interface HomeScreenProps {
  * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 내 별자리(맨 위) + 아침 알림 행 + 12별자리 오늘 한 줄 + 궁합·설정 행.
  * 광고 안내는 ⑥에서(흐름: steps/3-design/wireframes/byeol-today-flow.md).
  */
-export function HomeScreen({ content, today, mine, mineReady, notificationPrompt, onOpenSign, onFind, onEditMine, onAskNotification, onOpenMatch, onOpenSettings }: HomeScreenProps) {
+export function HomeScreen({
+  content,
+  today,
+  mine,
+  mineReady,
+  notificationPrompt,
+  interstitialUpcoming,
+  adBusy,
+  onOpenSign,
+  onFind,
+  onEditMine,
+  onAskNotification,
+  onOpenMatch,
+  onOpenSettings,
+}: HomeScreenProps) {
   const day = skyDay(today);
   const phase = day ? content.phases.find((p) => p.id === day.phase) : undefined;
   const lineFor = (sign: SignId) => (day ? readingFor(content, sign, day).total : signInfo(content, sign).trait);
@@ -76,6 +96,7 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
           <ListHeader
             title={
               <ListHeader.TitleParagraph typography="t5" fontWeight="bold" color={colors.grey800}>
+                {interstitialUpcoming && mine.length > 0 ? <AdMark /> : null}
                 내 별자리
               </ListHeader.TitleParagraph>
             }
@@ -86,6 +107,7 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
               <ListRow
                 key={item.id}
                 withArrow
+                disabled={adBusy}
                 onClick={() => onOpenSign(item.sign)}
                 contents={<ListRow.Texts type="2RowTypeA" top={mineTitle(item, signInfo(content, item.sign).name)} bottom={lineFor(item.sign)} />}
               />
@@ -98,9 +120,15 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
         </section>
       ) : null}
 
+      {interstitialUpcoming ? (
+        <Text display="block" typography="t7" color={colors.grey600} style={{ margin: '12px 24px 0' }}>
+          {AD_MESSAGES.interstitialNotice}
+        </Text>
+      ) : null}
       <ListHeader
         title={
           <ListHeader.TitleParagraph typography="t5" fontWeight="bold" color={colors.grey800}>
+            {interstitialUpcoming ? <AdMark /> : null}
             12별자리 오늘 운세
           </ListHeader.TitleParagraph>
         }
@@ -112,6 +140,7 @@ export function HomeScreen({ content, today, mine, mineReady, notificationPrompt
             <ListRow
               key={id}
               withArrow
+              disabled={adBusy}
               onClick={() => onOpenSign(id)}
               contents={<ListRow.Texts type="2RowTypeA" top={`${sign.name} · ${sign.dates}`} bottom={lineFor(id)} />}
             />

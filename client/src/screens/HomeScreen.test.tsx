@@ -9,7 +9,7 @@ import { HomeScreen } from './HomeScreen';
 const ME: MineItem = { id: 'aaaaaaaaaaaaaaaa', sign: 'aquarius', label: '나', addedAt: 1 };
 const MOM: MineItem = { id: 'bbbbbbbbbbbbbbbb', sign: 'leo', label: '엄마', addedAt: 2 };
 
-function renderHome(today: string, options: { mine?: MineItem[]; mineReady?: boolean; notificationPrompt?: boolean } = {}) {
+function renderHome(today: string, options: { mine?: MineItem[]; mineReady?: boolean; notificationPrompt?: boolean; interstitialUpcoming?: boolean; adBusy?: boolean } = {}) {
   const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn(), onAskNotification: vi.fn(), onOpenMatch: vi.fn(), onOpenSettings: vi.fn() };
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
@@ -19,6 +19,8 @@ function renderHome(today: string, options: { mine?: MineItem[]; mineReady?: boo
         mine={options.mine ?? []}
         mineReady={options.mineReady ?? true}
         notificationPrompt={options.notificationPrompt ?? false}
+        interstitialUpcoming={options.interstitialUpcoming ?? false}
+        adBusy={options.adBusy ?? false}
         {...handlers}
       />
     </TDSMobileAITProvider>,
@@ -87,6 +89,16 @@ describe('HomeScreen', () => {
     cleanup();
     renderHome('2026-10-20', { mine: [ME], notificationPrompt: false });
     expect(screen.queryByText('매일 아침 8시 운세 알림 받기')).not.toBeInTheDocument();
+  });
+
+  it('전면 광고 차례인 날은 목록 위 안내 한 줄과 AD 표시, 아니면 둘 다 없어요', () => {
+    renderHome('2026-10-20', { mine: [ME], interstitialUpcoming: true });
+    expect(screen.getByText('별자리를 처음 자세히 볼 때 광고가 한 번 나와요. 오늘은 그 뒤로 광고 없이 볼 수 있어요.')).toBeInTheDocument();
+    expect(screen.getAllByText('AD')).toHaveLength(2); // 내 별자리 · 12별자리 제목
+    cleanup();
+    renderHome('2026-10-20', { mine: [ME] });
+    expect(screen.queryByText(/광고가 한 번 나와요/)).not.toBeInTheDocument();
+    expect(screen.queryByText('AD')).not.toBeInTheDocument();
   });
 
   it("'오늘 하늘이란?'을 누르면 설명 시트", async () => {
