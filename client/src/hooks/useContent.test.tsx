@@ -59,6 +59,35 @@ describe('useContent (번들 → 캐시 → 하루 1회 원격)', () => {
     expect(third.result.current.source).toBe('bundled');
   });
 
+  it('refresh: 오늘 이미 물었어도 ETag 로 다시 묻고 — 304 면 same, 새 버전이면 updated, 실패면 failed', async () => {
+    window.localStorage.setItem(`__ait_storage:${CONTENT_CACHE_KEY}`, JSON.stringify({ version: 1, fetchedOn: '2026-10-23', etag: 'W/"v2"', content: remote }));
+    const { result } = renderHook(() => useContent('2026-10-23', '1.0.0'));
+    await waitFor(() => expect(result.current.source).toBe('remote'));
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fetchMock.mockResolvedValue(jsonResponse(null, 304, null));
+    let outcome = '';
+    await act(async () => {
+      outcome = await result.current.refresh();
+    });
+    expect(outcome).toBe('same');
+    expect((fetchMock.mock.calls[0][1] as { headers: Record<string, string> }).headers['If-None-Match']).toBe('W/"v2"');
+
+    fetchMock.mockResolvedValue(jsonResponse({ ...remote, contentVersion: 3 }, 200, 'W/"v3"'));
+    await act(async () => {
+      outcome = await result.current.refresh();
+    });
+    expect(outcome).toBe('updated');
+    expect(result.current.content.contentVersion).toBe(3);
+
+    fetchMock.mockRejectedValue(new Error('offline'));
+    await act(async () => {
+      outcome = await result.current.refresh();
+    });
+    expect(outcome).toBe('failed');
+    expect(result.current.content.contentVersion).toBe(3);
+  });
+
   it('캐시 모양이 다르면 없는 것으로', () => {
     expect(normalizeContentCache({ version: 1, fetchedOn: 'today', etag: null, content: bundledContent }, '1.0.0')).toBeNull();
     expect(normalizeContentCache({ version: 1, fetchedOn: '2026-10-23', etag: null, content: { nope: true } }, '1.0.0')).toBeNull();

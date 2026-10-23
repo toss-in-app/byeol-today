@@ -30,14 +30,19 @@ import type { SignId } from './sky';
 export default function App() {
   const route = useRoute();
   const today = kstDateKey();
-  const { content } = useContent(today);
-  useSky(today);
+  const { content, refresh: refreshContent } = useContent(today);
+  const { refresh: refreshSky } = useSky(today);
   const mine = useMine();
   const { settings, ready: settingsReady, update: updateSettings } = useSettings();
   const toast = useToast();
   const [adBusy, setAdBusy] = useState(false);
-  // 홈에서 당겨 놓으면 다시 그려요 — 자정을 넘겨 열어 둔 앱이 오늘(kstDateKey)을 다시 읽게
+  // 홈 당겨서 새로 고침: 오늘(kstDateKey)을 다시 읽고(자정 넘겨 열어 둔 앱), 원격 콘텐츠·오늘 하늘 표를 다시 물어요. 문장이 바뀌었을 때만 토스트
   const [, setRefreshTick] = useState(0);
+  const refreshHome = async () => {
+    setRefreshTick((n) => n + 1);
+    const [result] = await Promise.all([refreshContent(), refreshSky()]);
+    if (result === 'updated') toast.openToast('운세 문장을 새로 받았어요');
+  };
   /** 자세히·찾기 화면의 from(분석): 어디서 눌러 들어왔는지. 딥링크로 바로 열렸으면 'link' */
   const signFrom = useRef<'list' | 'mine' | 'link' | 'match'>(atHistoryBottom() && route.name === 'sign' ? 'link' : 'list');
 
@@ -194,7 +199,7 @@ export default function App() {
           onAskNotification={() => void askNotification()}
           onOpenMatch={() => openMatch()}
           onOpenSettings={() => navigate({ name: 'settings' })}
-          onRefresh={() => setRefreshTick((n) => n + 1)}
+          onRefresh={refreshHome}
         />
       );
     case 'sign':

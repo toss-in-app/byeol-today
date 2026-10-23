@@ -1,5 +1,5 @@
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { bundledContent } from '../content';
@@ -126,30 +126,32 @@ describe('HomeScreen', () => {
     expect(onOpenSettings).toHaveBeenCalled();
   });
 
-  it('맨 위에서 당겨 놓으면 차트가 다시 돌고(data-spin) onRefresh, 문턱 전에 놓으면 아무것도 안 해요', () => {
-    const onRefresh = vi.fn();
+  it('맨 위에서 당겨 놓으면 새로 고침(onRefresh → 돌림 → 최신이에요 → 제자리), 문턱 전에 놓으면 아무것도 안 해요', async () => {
+    const onRefresh = vi.fn(async () => {});
     const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn(), onAskNotification: vi.fn(), onOpenMatch: vi.fn(), onOpenSettings: vi.fn() };
     render(
       <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
         <HomeScreen content={bundledContent} today="2026-10-20" mine={[]} mineReady notificationPrompt={false} interstitialUpcoming={false} adBusy={false} onRefresh={onRefresh} {...handlers} />
       </TDSMobileAITProvider>,
     );
-    const wrapper = screen.getByText('오늘의 별자리 운세').closest('[data-spin]')!;
-    expect(wrapper).toHaveAttribute('data-spin', '0');
+    const wrapper = screen.getByText('오늘의 별자리 운세').closest('[data-pull]')!;
+    expect(wrapper).toHaveAttribute('data-pull', 'idle');
     // 짧게 당김(30px → 13px 이동, 문턱 34 미만)
     fireEvent.touchStart(wrapper, { touches: [{ clientY: 100 }] });
     fireEvent.touchMove(wrapper, { touches: [{ clientY: 130 }] });
-    expect(screen.getByText('당겨서 오늘 하늘 다시 보기')).toBeInTheDocument();
+    expect(screen.getByText('당겨서 새로 고침')).toBeInTheDocument();
     fireEvent.touchEnd(wrapper);
     expect(onRefresh).not.toHaveBeenCalled();
-    expect(wrapper).toHaveAttribute('data-spin', '0');
+    expect(wrapper).toHaveAttribute('data-pull', 'idle');
     // 충분히 당김(120px → 54px 이동)
     fireEvent.touchStart(wrapper, { touches: [{ clientY: 100 }] });
     fireEvent.touchMove(wrapper, { touches: [{ clientY: 220 }] });
-    expect(screen.getByText('놓으면 오늘 하늘이 다시 돌아요')).toBeInTheDocument();
+    expect(screen.getByText('놓으면 새로 고침')).toBeInTheDocument();
     fireEvent.touchEnd(wrapper);
+    expect(screen.getByText('새로 고침 중…')).toBeInTheDocument();
     expect(onRefresh).toHaveBeenCalledTimes(1);
-    expect(wrapper).toHaveAttribute('data-spin', '1');
+    expect(await screen.findByText('최신이에요', {}, { timeout: 2000 })).toBeInTheDocument();
+    await waitFor(() => expect(wrapper).toHaveAttribute('data-pull', 'idle'), { timeout: 2000 });
   });
 
   it('저장소를 읽기 전에는 내 별자리 구역을 그리지 않아요', () => {

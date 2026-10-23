@@ -11,7 +11,7 @@ import { SignIcon } from '../components/SignGlyph';
 import { SkyChart } from '../components/SkyChart';
 import { SkyInfoSheet } from '../components/SkyInfoSheet';
 import { signInfo, type Content } from '../content';
-import { usePullToSpin } from '../hooks/usePullToSpin';
+import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { PAPER } from '../lib/chart';
 import { formatDateLabel, formatTimeKo } from '../lib/date';
 import { mineTitle, type MineItem } from '../lib/state';
@@ -37,8 +37,8 @@ export interface HomeScreenProps {
   onAskNotification: () => void;
   onOpenMatch: () => void;
   onOpenSettings: () => void;
-  /** 맨 위에서 당겨서 놓았을 때(차트가 다시 도는 것과 별개로, 날짜가 바뀌었으면 오늘을 다시 읽게) */
-  onRefresh?: () => void;
+  /** 당겨서 새로 고침: 원격 콘텐츠·오늘 하늘 표를 다시 묻고 오늘 날짜를 다시 읽어요. 끝날 때까지 돌림 표시 */
+  onRefresh?: () => Promise<void>;
 }
 
 /**
@@ -66,23 +66,27 @@ export function HomeScreen({
   const lineFor = (sign: SignId) => (day ? readingFor(content, sign, day).total : signInfo(content, sign).trait);
   const nameOf = (id: SignId) => signInfo(content, id).name;
   const [skyOpen, setSkyOpen] = useState(false);
-  // 맨 위에서 당겨 놓으면 차트가 다시 돌아요(key 로 다시 그림) — 반복 움직임이 아니라 사용자가 부를 때만
-  const [spin, setSpin] = useState(0);
-  const pull = usePullToSpin(() => {
-    setSpin((n) => n + 1);
-    onRefresh?.();
+  // 당겨서 새로 고침 — 보통의 새로 고침처럼: 돌림 표시 → 원격 콘텐츠·표 다시 묻기 → '최신이에요'
+  const pull = usePullToRefresh(async () => {
+    await onRefresh?.();
   });
+  const pullText = pull.phase === 'refreshing' ? '새로 고침 중…' : pull.phase === 'done' ? '최신이에요' : pull.progress >= 1 ? '놓으면 새로 고침' : '당겨서 새로 고침';
+  const pullOpacity = pull.phase === 'pulling' ? pull.progress : pull.phase === 'idle' ? 0 : 1;
 
   return (
     <div
       {...pull.handlers}
-      data-spin={spin}
-      style={{ position: 'relative', transform: `translateY(${pull.offset}px)`, transition: pull.pulling ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' }}
+      data-pull={pull.phase}
+      style={{ position: 'relative', transform: `translateY(${pull.offset}px)`, transition: pull.phase === 'pulling' ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' }}
     >
-      {/* 당김 표시: 위에 숨어 있다가 당긴 만큼 보여요. 작은 차트가 당기는 만큼 돌아가요 */}
-      <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, top: -56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: PAPER.muted, fontSize: 13, opacity: pull.progress }}>
-        {day ? <SkyChart top="aries" moon={day.moon} nameOf={nameOf} size={26} highlightTop={false} animate={false} pulse={false} style={{ transform: `rotate(${pull.progress * 360}deg)` }} /> : null}
-        <span>{pull.progress >= 1 ? '놓으면 오늘 하늘이 다시 돌아요' : '당겨서 오늘 하늘 다시 보기'}</span>
+      {/* 당김 표시: 위에 숨어 있다가 당긴 만큼 보여요. 작은 차트가 당기는 만큼 돌고, 새로 고침 중엔 계속 돌아요 */}
+      <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, top: -56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: PAPER.muted, fontSize: 13, opacity: pullOpacity }}>
+        {day ? (
+          <span className={pull.phase === 'refreshing' ? 'byeol-spin' : undefined} style={{ display: 'inline-flex' }}>
+            <SkyChart top="aries" moon={day.moon} nameOf={nameOf} size={26} highlightTop={false} animate={false} pulse={false} style={{ transform: pull.phase === 'pulling' ? `rotate(${pull.progress * 360}deg)` : undefined }} />
+          </span>
+        ) : null}
+        <span>{pullText}</span>
       </div>
       <Top
         title={<Top.TitleParagraph size={22}>오늘의 별자리 운세</Top.TitleParagraph>}
@@ -107,7 +111,7 @@ export function HomeScreen({
               ) : null}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 'none' }}>
-              <SkyChart key={spin} top="aries" moon={day.moon} nameOf={nameOf} size={68} highlightTop={false} />
+              <SkyChart top="aries" moon={day.moon} nameOf={nameOf} size={68} highlightTop={false} />
               <MoonIcon illumination={day.illumination} phase={day.phase} size={30} />
             </div>
           </div>

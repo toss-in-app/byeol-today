@@ -72,12 +72,22 @@ body {
   transform-origin: center;
   animation: byeol-pulse 2.6s ease-out infinite;
 }
+/* 당겨서 새로 고침 중 돌림 표시 */
+@keyframes byeol-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.byeol-spin {
+  animation: byeol-spin 1s linear infinite;
+}
 @media (prefers-reduced-motion: reduce) {
   .byeol-sweep,
   .byeol-fade,
   .byeol-rise,
   .byeol-draw,
-  .byeol-pulse {
+  .byeol-pulse,
+  .byeol-spin {
     animation: none;
   }
   .byeol-pulse {
