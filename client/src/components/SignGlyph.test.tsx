@@ -1,8 +1,11 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { TDSMobileAITProvider } from '@toss/tds-mobile-ait';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { bundledContent, signInfo } from '../content';
 import { CONSTELLATIONS } from '../lib/constellations';
+import { skyDay } from '../sky';
+import { ChartSheet } from './ChartSheet';
 import { MoonIcon } from './MoonIcon';
 import { PaperBlock } from './PaperBlock';
 import { SignGlyph, SignIcon } from './SignGlyph';
@@ -66,5 +69,46 @@ describe('SkyChart', () => {
     expect(container.querySelectorAll('path')).toHaveLength(0);
     expect(container.querySelectorAll('line')).toHaveLength(13); // 경계선 12 + 달 선 1
     expect(container.querySelector('svg')!.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('뜰 때 달 그룹이 꼭대기에서 제 칸까지 돌아가고(회전 각도 = (집-1)×30°), animate=false 면 움직임 없음', () => {
+    const { container, unmount } = render(<SkyChart top="leo" moon="pisces" nameOf={nameOf} size={96} />);
+    const group = container.querySelector('g.byeol-sweep') as SVGGElement;
+    expect(group.style.transform).toBe('rotate(210deg)'); // 8번째 집 = 7칸 × 30°
+    expect(container.querySelectorAll('.byeol-draw')).toHaveLength(2);
+    unmount();
+    const still = render(<SkyChart top="leo" moon="pisces" nameOf={nameOf} size={96} animate={false} />);
+    expect(still.container.querySelector('.byeol-sweep')).toBeNull();
+    expect(still.container.querySelectorAll('.byeol-fade')).toHaveLength(0);
+  });
+
+  it('칸 누르기: onSelectHouse 가 있으면 12칸이 버튼이고 고른 칸에 테두리', () => {
+    const onSelect = vi.fn();
+    // 칸 버튼이 읽히려면 svg 자체가 aria-hidden 이 아니어야 해요(label 필수) — ChartSheet 가 그렇게 써요
+    render(<SkyChart top="leo" moon="pisces" nameOf={nameOf} size={300} label="천체도" onSelectHouse={onSelect} selectedHouse={8} />);
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(12);
+    expect(buttons[0]).toHaveAttribute('aria-label', '1번째 집 사자자리');
+    expect(buttons[7]).toHaveAttribute('aria-pressed', 'true');
+    expect(buttons[7].getAttribute('stroke')).toBe('#B5453A');
+    fireEvent.click(buttons[2]);
+    expect(onSelect).toHaveBeenCalledWith(3);
+    fireEvent.keyDown(buttons[4], { key: 'Enter' });
+    expect(onSelect).toHaveBeenCalledWith(5);
+  });
+});
+
+describe('ChartSheet', () => {
+  it('처음엔 오늘 달의 집이 골라져 있고, 다른 칸을 누르면 그 집의 뜻으로 바뀌어요', async () => {
+    const day = skyDay('2026-10-23')!; // 달 물고기자리 → 사자자리의 8번째 집
+    render(
+      <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
+        <ChartSheet content={bundledContent} sign="leo" day={day} open onClose={() => {}} />
+      </TDSMobileAITProvider>,
+    );
+    expect(await screen.findByText(/8번째 집 · .* · 오늘 달이 여기 있어요/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '2번째 집 처녀자리' }));
+    expect(screen.getByText(/^2번째 집 · 돈/)).toBeInTheDocument();
+    expect(screen.getByText(/주제: 돈과 소유/)).toBeInTheDocument();
   });
 });

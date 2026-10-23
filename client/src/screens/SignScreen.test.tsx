@@ -45,6 +45,13 @@ describe('SignScreen — 내 별자리로 등록', () => {
     expect(screen.getByText(bundledContent.readings['7'].love.enter)).toBeInTheDocument();
   });
 
+  it("'천체도 보기'를 누르면 12칸을 누를 수 있는 큰 천체도 시트", async () => {
+    renderSign();
+    fireEvent.click(screen.getByText('천체도 보기 ›'));
+    expect(await screen.findByRole('button', { name: '1번째 집 사자자리' })).toBeInTheDocument();
+    expect(screen.getByText(/7번째 집 · .* · 오늘 달이 여기 있어요/)).toBeInTheDocument();
+  });
+
   it('등록 버튼 → 이름표 시트 → 고른 이름표로 등록해요', async () => {
     const onRegister = renderSign();
     fireEvent.click(screen.getByRole('button', { name: '내 별자리로 등록' }));

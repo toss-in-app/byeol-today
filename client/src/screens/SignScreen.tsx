@@ -1,9 +1,10 @@
 import { colors } from '@toss/tds-colors';
-import { BottomSheet, Button, List, ListRow, Text, Top, useDialog, useToast } from '@toss/tds-mobile';
+import { BottomSheet, Button, List, ListRow, Text, TextButton, Top, useDialog, useToast } from '@toss/tds-mobile';
 import { useEffect, useState } from 'react';
 
 import { AdBanner } from '../components/AdBanner';
 import { AdMark } from '../components/AdMark';
+import { ChartSheet } from '../components/ChartSheet';
 import { LabelPicker } from '../components/LabelPicker';
 import { PaperBlock } from '../components/PaperBlock';
 import { SignGlyph } from '../components/SignGlyph';
@@ -44,13 +45,15 @@ export interface SignScreenProps {
 
 function ReadingRows({ reading }: { reading: Reading }) {
   return (
-    <List>
-      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="총운" bottom={reading.total} />} />
-      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="사랑" bottom={reading.love} />} />
-      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="일" bottom={reading.work} />} />
-      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="돈" bottom={reading.money} />} />
-      <ListRow contents={<ListRow.Texts type="2RowTypeA" top="달 모양" bottom={reading.phaseLine} />} />
-    </List>
+    <div className="byeol-rise" style={{ animationDelay: '120ms' }}>
+      <List>
+        <ListRow contents={<ListRow.Texts type="2RowTypeA" top="총운" bottom={reading.total} />} />
+        <ListRow contents={<ListRow.Texts type="2RowTypeA" top="사랑" bottom={reading.love} />} />
+        <ListRow contents={<ListRow.Texts type="2RowTypeA" top="일" bottom={reading.work} />} />
+        <ListRow contents={<ListRow.Texts type="2RowTypeA" top="돈" bottom={reading.money} />} />
+        <ListRow contents={<ListRow.Texts type="2RowTypeA" top="달 모양" bottom={reading.phaseLine} />} />
+      </List>
+    </div>
   );
 }
 
@@ -84,6 +87,7 @@ export function SignScreen({
     logEvent('sign_view', { sign, house: day ? houseOf(sign, day.moon) : null, from });
   }, [sign, day, from]);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [chartOpen, setChartOpen] = useState(false);
   const [label, setLabel] = useState<LabelChoice>(() => defaultLabel(mineCount));
   const [saving, setSaving] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
@@ -139,11 +143,13 @@ export function SignScreen({
         title={<Top.TitleParagraph size={22}>{info.name}</Top.TitleParagraph>}
         subtitleBottom={<Top.SubtitleParagraph size={17}>{info.dates}</Top.SubtitleParagraph>}
       />
-      {/* 종이 머리 블록(비주얼 '천체도'): 내 별자리가 꼭대기인 12칸 고리에 오늘 달의 집 + 근거 한 줄 */}
+      {/* 종이 머리 블록(비주얼 '천체도'): 내 별자리가 꼭대기인 12칸 고리에 오늘 달의 집(뜰 때 달이 돌아감) + 근거 한 줄. 차트·'천체도 보기'를 누르면 크게 */}
       <PaperBlock aria-label="오늘 하늘" style={{ margin: '0 20px 12px', padding: '14px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {day && reading ? (
-            <SkyChart top={sign} moon={day.moon} nameOf={(id) => signInfo(content, id).name} size={96} center={{ title: String(reading.house) }} label={`천체도: ${info.name}가 꼭대기, 오늘 달은 ${reading.house}번째 집`} />
+            <button type="button" aria-label="천체도 크게 보기" onClick={() => setChartOpen(true)} style={{ all: 'unset', cursor: 'pointer', display: 'block', flex: 'none' }}>
+              <SkyChart top={sign} moon={day.moon} nameOf={(id) => signInfo(content, id).name} size={96} center={{ title: String(reading.house) }} />
+            </button>
           ) : (
             <SignGlyph sign={sign} size={80} label={`${info.name} 별자리 그림`} />
           )}
@@ -156,6 +162,11 @@ export function SignScreen({
                 <Text display="block" typography="t7" color={PAPER.muted} style={{ marginTop: 4 }}>
                   {phase?.name ?? ''} · 밝기 {day.illumination}%
                 </Text>
+                <div style={{ marginTop: 2 }}>
+                  <TextButton size="small" color={PAPER.accent} onClick={() => setChartOpen(true)}>
+                    천체도 보기 ›
+                  </TextButton>
+                </div>
               </>
             ) : (
               <Text display="block" typography="t6" color={PAPER.ink}>
@@ -165,6 +176,7 @@ export function SignScreen({
           </div>
         </div>
       </PaperBlock>
+      {day ? <ChartSheet content={content} sign={sign} day={day} open={chartOpen} onClose={() => setChartOpen(false)} /> : null}
       <Text display="block" typography="t6" color={colors.grey700} style={{ margin: '0 20px 12px' }}>
         {info.trait}
       </Text>

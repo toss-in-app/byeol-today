@@ -3,6 +3,7 @@ import { Button, Text, Top } from '@toss/tds-mobile';
 import { useEffect, useRef, useState } from 'react';
 
 import { AdMark } from '../components/AdMark';
+import { SignIcon } from '../components/SignGlyph';
 import { SignPickerSheet } from '../components/SignPickerSheet';
 import { signInfo, type Content } from '../content';
 import { logEvent } from '../lib/analytics';
@@ -100,6 +101,14 @@ export function MatchScreen({ content, today, mine, initialA, initialB, isDetail
 
       {result && a && b ? (
         <section aria-label="궁합 결과" style={{ margin: '0 20px' }}>
+          {/* 두 별자리 선 그림이 만나는 줄 — 결과가 바뀔 때마다 살짝 떠올라요 */}
+          <div key={result.key} className="byeol-rise" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <SignIcon sign={a} size={48} />
+            <Text typography="t6" color={colors.grey500}>
+              ×
+            </Text>
+            <SignIcon sign={b} size={48} />
+          </div>
           <Text display="block" typography="t7" color={colors.grey600}>
             {elementName(result.elements[0])} × {elementName(result.elements[1])}
           </Text>

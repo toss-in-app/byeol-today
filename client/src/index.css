@@ -13,3 +13,50 @@ body {
 [role='heading'][aria-level='1'] {
   text-wrap: balance;
 }
+
+/* 비주얼 '천체도' 움직임 — 짧고 한 번만(화면이 뜰 때). 줄이기 설정이면 끔 */
+@keyframes byeol-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+}
+@keyframes byeol-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes byeol-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes byeol-draw {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+}
+.byeol-sweep {
+  animation: byeol-sweep 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.byeol-fade {
+  animation: byeol-fade 0.4s ease-out both;
+}
+.byeol-rise {
+  animation: byeol-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.byeol-draw {
+  animation: byeol-draw 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.byeol-sector {
+  cursor: pointer;
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .byeol-sweep,
+  .byeol-fade,
+  .byeol-rise,
+  .byeol-draw {
+    animation: none;
+  }
+}
