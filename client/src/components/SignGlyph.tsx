@@ -47,6 +47,18 @@ export function SignGlyph({ sign, size = 40, tone = 'ink', label, style }: SignG
   );
 }
 
+/** 카드 머리용: 종이색 둥근 네모 타일 안의 선 그림(꾸밈) */
+export function SignTile({ sign, size = 40 }: { sign: SignId; size?: number }) {
+  return (
+    <span
+      aria-hidden
+      style={{ display: 'inline-flex', boxSizing: 'border-box', width: size, height: size, borderRadius: Math.round(size / 4), background: PAPER.paper, border: '1px solid rgba(31, 35, 64, 0.22)', alignItems: 'center', justifyContent: 'center', flex: 'none' }}
+    >
+      <SignGlyph sign={sign} size={Math.round(size * 0.7)} />
+    </span>
+  );
+}
+
 /** 목록 왼쪽용: 종이색 원(가는 잉크 테두리) 안의 선 그림(꾸밈 — 이름은 옆 글에 있어요) */
 export function SignIcon({ sign, size = 40 }: { sign: SignId; size?: number }) {
   return (
