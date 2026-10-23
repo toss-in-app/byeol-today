@@ -2,6 +2,7 @@ import { colors } from '@toss/tds-colors';
 import { List, ListRow, Text, TextButton, Top, useDialog } from '@toss/tds-mobile';
 import type { MouseEvent } from 'react';
 
+import { NotificationPromptRow } from '../components/NotificationPromptRow';
 import { signInfo, type Content } from '../content';
 import { eulReul } from '../lib/josa';
 import { MAX_MINE, mineTitle, type MineItem } from '../lib/state';
@@ -11,13 +12,16 @@ export interface MineScreenProps {
   content: Content;
   today: string;
   items: MineItem[];
+  /** 아직 알림을 묻지 않았을 때만(거부했으면 설정에서만) */
+  notificationPrompt: boolean;
   onOpenSign: (sign: SignId) => void;
   onAdd: () => void;
   onRemove: (id: string) => Promise<void>;
+  onAskNotification: () => void;
 }
 
-/** 내 별자리(주요 기능 2): 등록 순 목록(오늘 한 줄), 행 오른쪽 삭제(확인 창, 왼쪽 '닫기'), 5개 미만이면 추가. 아침 알림 행은 기능 ③에서 */
-export function MineScreen({ content, today, items, onOpenSign, onAdd, onRemove }: MineScreenProps) {
+/** 내 별자리(주요 기능 2): 등록 순 목록(오늘 한 줄), 행 오른쪽 삭제(확인 창, 왼쪽 '닫기'), 5개 미만이면 추가, 아침 알림 행 */
+export function MineScreen({ content, today, items, notificationPrompt, onOpenSign, onAdd, onRemove, onAskNotification }: MineScreenProps) {
   const day = skyDay(today);
   const { openConfirm } = useDialog();
 
@@ -63,6 +67,7 @@ export function MineScreen({ content, today, items, onOpenSign, onAdd, onRemove 
             />
           );
         })}
+        {items.length > 0 && notificationPrompt ? <NotificationPromptRow onClick={onAskNotification} /> : null}
         {items.length < MAX_MINE ? (
           <ListRow withArrow onClick={onAdd} contents={<ListRow.Texts type="2RowTypeA" top="내 별자리 추가" bottom="생일로 찾거나 목록에서 골라요" />} />
         ) : (

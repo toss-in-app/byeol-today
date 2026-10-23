@@ -9,11 +9,11 @@ import { MineScreen } from './MineScreen';
 const ME: MineItem = { id: 'aaaaaaaaaaaaaaaa', sign: 'aquarius', label: '나', addedAt: 1 };
 const MOM: MineItem = { id: 'bbbbbbbbbbbbbbbb', sign: 'leo', label: '엄마', addedAt: 2 };
 
-function renderMine(items: MineItem[]) {
-  const handlers = { onOpenSign: vi.fn(), onAdd: vi.fn(), onRemove: vi.fn(async () => {}) };
+function renderMine(items: MineItem[], notificationPrompt = false) {
+  const handlers = { onOpenSign: vi.fn(), onAdd: vi.fn(), onRemove: vi.fn(async () => {}), onAskNotification: vi.fn() };
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
-      <MineScreen content={bundledContent} today="2026-10-20" items={items} {...handlers} />
+      <MineScreen content={bundledContent} today="2026-10-20" items={items} notificationPrompt={notificationPrompt} {...handlers} />
     </TDSMobileAITProvider>,
   );
   return handlers;
@@ -43,6 +43,12 @@ describe('MineScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: '엄마 · 사자자리 삭제' }));
     fireEvent.click(await screen.findByRole('button', { name: '삭제' }));
     await waitFor(() => expect(onRemove).toHaveBeenCalledWith('bbbbbbbbbbbbbbbb'));
+  });
+
+  it('아침 알림 행은 아직 묻지 않았을 때만', () => {
+    const { onAskNotification } = renderMine([ME], true);
+    fireEvent.click(screen.getByText('매일 아침 8시 운세 알림 받기'));
+    expect(onAskNotification).toHaveBeenCalled();
   });
 
   it('비어 있으면 안내, 5개면 추가 행 대신 안내 문장', () => {

@@ -1,5 +1,5 @@
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { bundledContent } from '../content';
@@ -9,11 +9,18 @@ import { HomeScreen } from './HomeScreen';
 const ME: MineItem = { id: 'aaaaaaaaaaaaaaaa', sign: 'aquarius', label: '나', addedAt: 1 };
 const MOM: MineItem = { id: 'bbbbbbbbbbbbbbbb', sign: 'leo', label: '엄마', addedAt: 2 };
 
-function renderHome(today: string, options: { mine?: MineItem[]; mineReady?: boolean } = {}) {
-  const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn() };
+function renderHome(today: string, options: { mine?: MineItem[]; mineReady?: boolean; notificationPrompt?: boolean } = {}) {
+  const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn(), onAskNotification: vi.fn() };
   render(
     <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
-      <HomeScreen content={bundledContent} today={today} mine={options.mine ?? []} mineReady={options.mineReady ?? true} {...handlers} />
+      <HomeScreen
+        content={bundledContent}
+        today={today}
+        mine={options.mine ?? []}
+        mineReady={options.mineReady ?? true}
+        notificationPrompt={options.notificationPrompt ?? false}
+        {...handlers}
+      />
     </TDSMobileAITProvider>,
   );
   return handlers;
@@ -66,6 +73,20 @@ describe('HomeScreen', () => {
     expect(onOpenSign).toHaveBeenCalledWith('leo');
     fireEvent.click(screen.getByText('편집'));
     expect(onEditMine).toHaveBeenCalled();
+  });
+
+  it('아침 알림 행은 내 별자리가 있고 아직 묻지 않았을 때만, 누른 뒤에 동의를 요청해요', () => {
+    const { onAskNotification } = renderHome('2026-10-20', { mine: [ME], notificationPrompt: true });
+    fireEvent.click(screen.getByText('매일 아침 8시 운세 알림 받기'));
+    expect(onAskNotification).toHaveBeenCalled();
+  });
+
+  it('내 별자리가 없거나 이미 물었으면 알림 행이 없어요', () => {
+    renderHome('2026-10-20', { notificationPrompt: true });
+    expect(screen.queryByText('매일 아침 8시 운세 알림 받기')).not.toBeInTheDocument();
+    cleanup();
+    renderHome('2026-10-20', { mine: [ME], notificationPrompt: false });
+    expect(screen.queryByText('매일 아침 8시 운세 알림 받기')).not.toBeInTheDocument();
   });
 
   it('저장소를 읽기 전에는 내 별자리 구역을 그리지 않아요', () => {

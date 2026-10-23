@@ -1,6 +1,7 @@
 import { colors } from '@toss/tds-colors';
 import { List, ListHeader, ListRow, Text, Top } from '@toss/tds-mobile';
 
+import { NotificationPromptRow } from '../components/NotificationPromptRow';
 import { signInfo, type Content } from '../content';
 import { formatDateLabel, formatTimeKo } from '../lib/date';
 import { mineTitle, type MineItem } from '../lib/state';
@@ -13,16 +14,19 @@ export interface HomeScreenProps {
   /** 내 별자리(등록 순). 저장소를 읽기 전(mineReady=false)에는 찾기 행을 아직 그리지 않아요 */
   mine: MineItem[];
   mineReady: boolean;
+  /** 내 별자리를 등록했고 아직 알림을 묻지 않았을 때만 true — 행을 누른 뒤에만 동의 화면 */
+  notificationPrompt: boolean;
   onOpenSign: (sign: SignId) => void;
   onFind: () => void;
   onEditMine: () => void;
+  onAskNotification: () => void;
 }
 
 /**
- * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 내 별자리(맨 위) + 12별자리 오늘 한 줄.
- * 알림 행·광고 안내·궁합·설정 행은 뒤 기능과 함께(흐름: steps/3-design/wireframes/byeol-today-flow.md).
+ * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 내 별자리(맨 위) + 아침 알림 행 + 12별자리 오늘 한 줄.
+ * 광고 안내·궁합·설정 행은 뒤 기능과 함께(흐름: steps/3-design/wireframes/byeol-today-flow.md).
  */
-export function HomeScreen({ content, today, mine, mineReady, onOpenSign, onFind, onEditMine }: HomeScreenProps) {
+export function HomeScreen({ content, today, mine, mineReady, notificationPrompt, onOpenSign, onFind, onEditMine, onAskNotification }: HomeScreenProps) {
   const day = skyDay(today);
   const phase = day ? content.phases.find((p) => p.id === day.phase) : undefined;
   const lineFor = (sign: SignId) => (day ? readingFor(content, sign, day).total : signInfo(content, sign).trait);
@@ -78,6 +82,7 @@ export function HomeScreen({ content, today, mine, mineReady, onOpenSign, onFind
             {mine.length === 0 ? (
               <ListRow withArrow onClick={onFind} contents={<ListRow.Texts type="2RowTypeA" top="내 별자리 찾기" bottom="생일로 찾거나 목록에서 골라요" />} />
             ) : null}
+            {mine.length > 0 && notificationPrompt ? <NotificationPromptRow onClick={onAskNotification} /> : null}
           </List>
         </section>
       ) : null}
