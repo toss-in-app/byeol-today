@@ -54,4 +54,21 @@ describe('MatchScreen', () => {
     renderMatch();
     expect(screen.getByText('두 별자리를 골라 주세요.')).toBeInTheDocument();
   });
+
+  it('내 별자리가 저장소에서 늦게 와도 첫 자리에 채워요', () => {
+    const props = { content: bundledContent, today: '2026-10-20', isDetailUnlocked: () => false, onUnlockDetail: async () => true };
+    const { rerender } = render(
+      <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
+        <MatchScreen {...props} mine={[]} />
+      </TDSMobileAITProvider>,
+    );
+    expect(screen.getByText('두 별자리를 골라 주세요.')).toBeInTheDocument();
+    rerender(
+      <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
+        <MatchScreen {...props} mine={[ME]} />
+      </TDSMobileAITProvider>,
+    );
+    expect(screen.getByRole('button', { name: '첫 번째 별자리: 물병자리' })).toBeInTheDocument();
+    expect(screen.getByText('상대 별자리를 골라 주세요.')).toBeInTheDocument();
+  });
 });

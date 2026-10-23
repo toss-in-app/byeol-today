@@ -1,6 +1,6 @@
 import { colors } from '@toss/tds-colors';
 import { Button, Text, Top } from '@toss/tds-mobile';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { SignPickerSheet } from '../components/SignPickerSheet';
 import { signInfo, type Content } from '../content';
@@ -30,12 +30,18 @@ export function MatchScreen({ content, today, mine, initialA, initialB, isDetail
   const [picking, setPicking] = useState<Side | null>(null);
   const [busy, setBusy] = useState(false);
   const day = skyDay(today);
+  // 내 별자리는 저장소에서 늦게 오니, 사용자가 아직 아무것도 안 골랐으면 그때 첫 번째를 채워요
+  const touched = useRef(false);
+  useEffect(() => {
+    if (!touched.current && !initialA && a === null && mine[0]) setA(mine[0].sign);
+  }, [mine, a, initialA]);
   const name = (id: SignId | null) => (id ? signInfo(content, id).name : '고르기');
 
   const result = a && b ? matchFor(content, a, b) : null;
   const unlocked = a && b ? isDetailUnlocked(a, b) : false;
 
   const pick = (sign: SignId) => {
+    touched.current = true;
     if (picking === 'a') setA(sign);
     if (picking === 'b') setB(sign);
     setPicking(null);
