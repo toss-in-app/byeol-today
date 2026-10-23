@@ -1,6 +1,6 @@
 /**
  * 콘텐츠(계약: contract/content.schema.json).
- * 번들 동봉본(bundled.json)으로 즉시 그리고, 원격 content.json 은 하루 한 번 시도해요(연결은 5단계).
+ * 번들 동봉본(bundled.json)으로 즉시 그리고, 원격 content.json 은 하루 한 번 ETag 로 물어요(hooks/useContent).
  * 원격이 실패하거나 형식이 다르거나 minClientVersion 이 이 클라보다 크면 번들본을 써요.
  */
 import { withTimeout } from '../lib/async';
@@ -13,6 +13,8 @@ export const TERMS_URL = `${STATIC_BASE_URL}/terms/`;
 export const PRIVACY_URL = `${STATIC_BASE_URL}/privacy/`;
 /** 공유 링크 미리보기 이미지 1200×600 (9단계에 제작·배포) */
 export const OG_IMAGE_URL = `${STATIC_BASE_URL}/og.png`;
+/** 오늘 하늘 표 연장분(해마다 하나) */
+export const skyUrl = (year: number): string => `${STATIC_BASE_URL}/sky-${year}.json`;
 const FETCH_TIMEOUT_MS = 3000;
 
 export type Area = 'total' | 'love' | 'work' | 'money';
@@ -74,19 +76,40 @@ export function isUsableContent(json: unknown, clientVersion: string): json is C
   if (typeof c.contentVersion !== 'number' || typeof c.minClientVersion !== 'string') return false;
   if (compareVersions(c.minClientVersion, clientVersion) > 0) return false;
   if (!Array.isArray(c.signs) || c.signs.length !== 12) return false;
+  if (!Array.isArray(c.houses) || c.houses.length !== 12) return false;
   if (!c.readings || typeof c.readings !== 'object') return false;
-  for (let house = 1; house <= 12; house += 1) if (!c.readings[String(house)]) return false;
-  return Array.isArray(c.phases) && c.phases.length === 8;
+  for (let house = 1; house <= 12; house += 1) {
+    const r = c.readings[String(house)];
+    if (!r) return false;
+    for (const area of ['total', 'love', 'work', 'money'] as const) {
+      const byDay = r[area];
+      if (!byDay || typeof byDay.enter !== 'string' || typeof byDay.stay !== 'string' || typeof byDay.leave !== 'string') return false;
+    }
+  }
+  if (!Array.isArray(c.phases) || c.phases.length !== 8) return false;
+  if (!c.match || typeof c.match !== 'object' || !c.match.pairs || !c.match.today) return false;
+  if (!c.sky || typeof c.sky.intro !== 'string') return false;
+  return c.notice === null || typeof c.notice === 'string';
 }
 
-export async function fetchRemoteContent(clientVersion: string = __APP_VERSION__): Promise<Content | null> {
+export type RemoteContentResult = { status: 'ok'; content: Content; etag: string | null } | { status: 'notModified' } | { status: 'failed' };
+
+/**
+ * 원격 content.json 을 받아요. etag 가 있으면 If-None-Match 로 물어 304 면 'notModified'.
+ * 네트워크·시간 초과·404·형식 오류·minClientVersion 초과는 모두 'failed'(호출한 쪽은 지금 것을 그대로 써요).
+ */
+export async function fetchRemoteContent(clientVersion: string = __APP_VERSION__, etag: string | null = null): Promise<RemoteContentResult> {
   try {
-    const response = await withTimeout(fetch(CONTENT_URL), FETCH_TIMEOUT_MS);
-    if (!response.ok) return null;
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (etag) headers['If-None-Match'] = etag;
+    const response = await withTimeout(fetch(CONTENT_URL, { headers }), FETCH_TIMEOUT_MS);
+    if (response.status === 304) return { status: 'notModified' };
+    if (!response.ok) return { status: 'failed' };
     const json: unknown = await response.json();
-    return isUsableContent(json, clientVersion) ? json : null;
+    if (!isUsableContent(json, clientVersion)) return { status: 'failed' };
+    return { status: 'ok', content: json, etag: response.headers.get('ETag') };
   } catch {
-    return null;
+    return { status: 'failed' };
   }
 }
 

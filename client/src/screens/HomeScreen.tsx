@@ -89,6 +89,11 @@ export function HomeScreen({
           </TextButton>
         </div>
       </section>
+      {content.notice ? (
+        <Text display="block" typography="t7" color={colors.grey700} style={{ margin: '0 24px 12px' }} role="status">
+          {content.notice}
+        </Text>
+      ) : null}
       <SkyInfoSheet content={content} open={skyOpen} onClose={() => setSkyOpen(false)} />
 
       {mineReady ? (

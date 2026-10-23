@@ -78,6 +78,23 @@ export function skyDay(dateKey: string): SkyDay | null {
   return byDate.get(dateKey) ?? null;
 }
 
+/** 연장분(sky-YYYY.json, sky/remote.ts)을 표에 덧붙여요. 번들에 있는 날은 번들 값을 지켜요 */
+export function extendSkyTable(days: SkyDay[]): number {
+  let added = 0;
+  for (const day of days) {
+    if (byDate.has(day.date)) continue;
+    byDate.set(day.date, day);
+    added += 1;
+  }
+  return added;
+}
+
+/** 테스트용: 연장분을 지워요 */
+export function resetSkyTableForTests(): void {
+  byDate.clear();
+  for (const day of table.days) byDate.set(day.date, day);
+}
+
 /** 내 별자리부터 세어 오늘 달이 몇 번째 별자리에 있는지 (1~12) */
 export function houseOf(sign: SignId, moon: SignId): number {
   return ((signIndex(moon) - signIndex(sign) + 12) % 12) + 1;

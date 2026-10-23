@@ -101,6 +101,16 @@ describe('HomeScreen', () => {
     expect(screen.queryByText('AD')).not.toBeInTheDocument();
   });
 
+  it('콘텐츠 공지가 있으면 오늘 하늘 카드 아래 한 줄', () => {
+    const handlers = { onOpenSign: vi.fn(), onFind: vi.fn(), onEditMine: vi.fn(), onAskNotification: vi.fn(), onOpenMatch: vi.fn(), onOpenSettings: vi.fn() };
+    render(
+      <TDSMobileAITProvider brandPrimaryColor="#4C5FD5">
+        <HomeScreen content={{ ...bundledContent, notice: '10월 25일 새벽에 잠깐 점검해요.' }} today="2026-10-20" mine={[]} mineReady notificationPrompt={false} interstitialUpcoming={false} adBusy={false} {...handlers} />
+      </TDSMobileAITProvider>,
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('10월 25일 새벽에 잠깐 점검해요.');
+  });
+
   it("'오늘 하늘이란?'을 누르면 설명 시트", async () => {
     renderHome('2026-10-20');
     fireEvent.click(screen.getByText('오늘 하늘이란? ›'));

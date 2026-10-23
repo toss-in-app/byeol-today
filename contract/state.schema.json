@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://toss-in-app.github.io/byeol-today/state.schema.json",
   "title": "byeol-today 기기 저장 v1 (Storage 키)",
-  "description": "기기 로컬 Storage 에 문자열(JSON)로 저장. 개인정보 없음 — 생일·태어난 해는 저장하지 않고 고른 별자리만. 모양이 다르면 클라는 빈 값으로 취급한다.",
+  "description": "기기 로컬 Storage 에 문자열(JSON)로 저장. 개인정보 없음 — 생일·태어난 해는 저장하지 않고 고른 별자리만. 모양이 다르면 클라는 빈 값으로 취급한다. v2: 원격 콘텐츠·오늘 하늘 연장 캐시 2개(선택).",
   "type": "object",
   "required": [
     "zodiac.mine.v1",
@@ -14,6 +14,12 @@
     },
     "zodiac.settings.v1": {
       "$ref": "#/$defs/settings"
+    },
+    "zodiac.content.v1": {
+      "$ref": "#/$defs/contentCache"
+    },
+    "zodiac.sky.v1": {
+      "$ref": "#/$defs/skyCache"
     }
   },
   "$defs": {
@@ -200,6 +206,65 @@
         }
       },
       "description": "tomorrow: 별자리 id 목록, matchDetail: 'aries-leo' 처럼 이름 순으로 정렬한 쌍"
+    },
+    "contentCache": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "fetchedOn",
+        "etag",
+        "content"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "fetchedOn": {
+          "$ref": "#/$defs/date",
+          "description": "마지막으로 서버에 물어본 한국 날짜(하루 1회)"
+        },
+        "etag": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 200
+            }
+          ]
+        },
+        "content": {
+          "type": "object",
+          "description": "content.schema.json 을 통과한 원격 콘텐츠 그대로(클라는 다시 isUsableContent 로 확인)"
+        }
+      },
+      "description": "원격 content.json 캐시 — 날이 바뀌면 ETag(If-None-Match)로 다시 묻고, 304 면 날짜만 갱신"
+    },
+    "skyCache": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "tables"
+      ],
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "tables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "sky.schema.json 모양(sky-YYYY.json 그대로)"
+          },
+          "propertyNames": {
+            "pattern": "^[0-9]{4}$"
+          }
+        }
+      },
+      "description": "번들 표 범위 밖 날짜에 받은 sky-YYYY.json 연장분(해마다 하나)"
     }
   }
 }
