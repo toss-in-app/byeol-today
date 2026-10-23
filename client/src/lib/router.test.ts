@@ -22,11 +22,11 @@ describe('router', () => {
   });
 
   it('딥링크(콘솔 앱 내 기능·공유 링크)', () => {
-    expect(routeFromSchemeUrl('intoss://zodiac-today')).toEqual({ name: 'home' });
-    expect(routeFromSchemeUrl('intoss://zodiac-today/mine')).toEqual({ name: 'mine' });
-    expect(routeFromSchemeUrl('intoss://zodiac-today/match?a=aquarius&b=leo')).toEqual({ name: 'match', a: 'aquarius', b: 'leo' });
-    expect(routeFromSchemeUrl('intoss://zodiac-today/match?a=dragon')).toEqual({ name: 'match' });
-    expect(routeFromSchemeUrl('intoss://zodiac-today/sign/pisces')).toEqual({ name: 'sign', sign: 'pisces' });
+    expect(routeFromSchemeUrl('intoss://byeol-today')).toEqual({ name: 'home' });
+    expect(routeFromSchemeUrl('intoss://byeol-today/mine')).toEqual({ name: 'mine' });
+    expect(routeFromSchemeUrl('intoss://byeol-today/match?a=aquarius&b=leo')).toEqual({ name: 'match', a: 'aquarius', b: 'leo' });
+    expect(routeFromSchemeUrl('intoss://byeol-today/match?a=dragon')).toEqual({ name: 'match' });
+    expect(routeFromSchemeUrl('intoss://byeol-today/sign/pisces')).toEqual({ name: 'sign', sign: 'pisces' });
     expect(routeFromSchemeUrl('not a url')).toBeNull();
   });
 

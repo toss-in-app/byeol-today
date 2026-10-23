@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://toss-in-app.github.io/zodiac-today/content.schema.json",
-  "title": "zodiac-today 콘텐츠 v1",
+  "$id": "https://toss-in-app.github.io/byeol-today/content.schema.json",
+  "title": "byeol-today 콘텐츠 v1",
   "description": "정적 JSON(content.json)과 번들 동봉본의 모양. 화면에 그대로 보여질 완성 문장만 — URL·표현식·템플릿 문자열 없음. 별자리·집·달 모양 번호를 문장에 끼워 넣는 일은 클라가 한다(번들 고정 문구). 금칙어(주식·코인·복권·질병·사고 등)와 이모지는 빌드 스크립트에서 검사한다.",
   "type": "object",
   "additionalProperties": false,

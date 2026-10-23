@@ -1,4 +1,4 @@
-# zodiac-today 이름표 — 분석 이벤트·광고 그룹·알림 템플릿·공유 링크 (계약 v1, 2026-10-20 초안)
+# byeol-today 이름표 — 분석 이벤트·광고 그룹·알림 템플릿·공유 링크 (계약 v1, 2026-10-20 초안)
 
 개인정보는 어떤 이벤트에도 싣지 않는다. 생일·태어난 해·이름표('나'·'엄마')는 보내지 않고 별자리 id 만.
 
@@ -41,7 +41,7 @@
 | 항목 | 값 |
 |------|----|
 | 동의문 | 정기(SCHEDULED)·매일(DAILY) 08:00, purpose "오늘 운세" → 동의 화면 제목 "매일 오늘 운세 알림을 보내드릴까요?" |
-| 템플릿 | REGULAR · FUNCTIONAL, 발송 코드 `zodiac-today-daily-sky`(콘솔이 `{appName}-` 접두), 제목 **"오늘 운세"**(5자), 본문 **"오늘 하늘로 본 별자리 운세가 왔어요."**(21자), 링크 `intoss://zodiac-today` |
+| 템플릿 | REGULAR · FUNCTIONAL, 발송 코드 `byeol-today-daily-sky`(콘솔이 `{appName}-` 접두), 제목 **"오늘 운세"**(5자), 본문 **"오늘 하늘로 본 별자리 운세가 왔어요."**(21자), 링크 `intoss://byeol-today` |
 | 앱 흐름 | 내 별자리를 처음 등록한 뒤에만 홈·내 별자리 화면에 "매일 아침 8시 운세 알림 받기" 행 → `Notification.requestAgreement`. 거부하면 홈에서 숨기고 설정에서만 다시. 진입 즉시·뒤로가기 때 묻지 않음 |
 | 개인화 | 모두에게 같은 문구(변수는 이름뿐). 별자리별 문장은 앱에서 — 알림을 누르면 홈 맨 위에 내 별자리 |
 
@@ -49,12 +49,12 @@
 
 - **오늘 카드 이미지**: 1080×1350 PNG — 날짜, 별자리 이름·기호, 총운 한 줄, 오늘 하늘 한 줄(달의 별자리·모양), 워터마크 "오늘의 별자리 운세 · 토스에서 검색". `File.saveBase64`(photos 권한, 저장 버튼을 누를 때만 요청). 거부해도 링크 공유는 됨.
 - **링크**: `Share.createLink({ path, ogImageUrl })`
-  - 별자리: `intoss://zodiac-today/sign/<id>` → 받은 사람은 그 별자리 자세히(첫 화면, 뒤로가기 = 종료, 전면 광고 없음)
-  - 궁합: `intoss://zodiac-today/match?a=<id>&b=<id>` → 받은 사람은 그 궁합 결과(요약까지, 자세히는 리워드)
+  - 별자리: `intoss://byeol-today/sign/<id>` → 받은 사람은 그 별자리 자세히(첫 화면, 뒤로가기 = 종료, 전면 광고 없음)
+  - 궁합: `intoss://byeol-today/match?a=<id>&b=<id>` → 받은 사람은 그 궁합 결과(요약까지, 자세히는 리워드)
   - OG 이미지: 정적 `og.png` 1200×600
 - 공유 리워드(토스 포인트)는 쓰지 않음(2026-10-23 종료, 공지 53433).
 
 ## 앱 내 기능 (콘솔 등록, 9단계)
-1. 오늘의 별자리 운세 — `intoss://zodiac-today`
-2. 내 별자리 — `intoss://zodiac-today/mine`
-3. 별자리 궁합 — `intoss://zodiac-today/match`
+1. 오늘의 별자리 운세 — `intoss://byeol-today`
+2. 내 별자리 — `intoss://byeol-today/mine`
+3. 별자리 궁합 — `intoss://byeol-today/match`

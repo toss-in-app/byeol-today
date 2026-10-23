@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://toss-in-app.github.io/zodiac-today/sky.schema.json",
-  "title": "zodiac-today 오늘 하늘 표 v1",
+  "$id": "https://toss-in-app.github.io/byeol-today/sky.schema.json",
+  "title": "byeol-today 오늘 하늘 표 v1",
   "description": "빌드 때 astronomy-engine 으로 계산한 날마다의 달 정보. 번들에 1~2년 치, 다음 해 분은 정적 JSON(sky-YYYY.json)으로 연장. 한국 시간 아침 8시 기준. 문장이 아니라 계산 결과라 content 와 따로 둔다.",
   "type": "object",
   "additionalProperties": false,

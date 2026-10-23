@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://toss-in-app.github.io/zodiac-today/sun-ingress.schema.json",
-  "title": "zodiac-today 태양 별자리 경계 표 v1",
+  "$id": "https://toss-in-app.github.io/byeol-today/sun-ingress.schema.json",
+  "title": "byeol-today 태양 별자리 경계 표 v1",
   "description": "생일로 찾기용. 해마다 태양이 각 별자리에 들어온 시각(한국 시간, 그해 안의 12번, 날짜 순). 빌드 때 1930~2030년을 계산해 번들에 넣는다. 태어난 해를 모르면 클라가 경계일 목록(해·시각에 따라 갈리는 28일)으로 두 별자리 중 고르게 한다.",
   "type": "object",
   "additionalProperties": false,

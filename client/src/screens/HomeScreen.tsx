@@ -14,7 +14,7 @@ export interface HomeScreenProps {
 
 /**
  * 첫 화면(주요 기능 1): 오늘 하늘 카드 + 12별자리 오늘 한 줄.
- * 4단계 골격 — 내 별자리·알림·광고 안내·궁합·설정 행은 5단계 기능과 함께(흐름: steps/3-design/wireframes/zodiac-today-flow.md).
+ * 4단계 골격 — 내 별자리·알림·광고 안내·궁합·설정 행은 5단계 기능과 함께(흐름: steps/3-design/wireframes/byeol-today-flow.md).
  */
 export function HomeScreen({ content, today, onOpenSign }: HomeScreenProps) {
   const day = skyDay(today);

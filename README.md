@@ -1,7 +1,7 @@
-# zodiac-today — 오늘의 별자리 운세 (앱인토스 미니앱)
+# byeol-today — 오늘의 별자리 운세 (앱인토스 미니앱)
 
 오늘 달이 지나는 별자리('오늘 하늘')로 12별자리 운세를 모두 보여 주고, 등록한 별자리들(나·가족·친구)을 맨 위에 모아 아침 알림으로 챙겨 보게 하는 미니앱이에요.
-서버·로그인 없음. 저장은 기기 로컬(`Storage`), 콘텐츠는 정적 JSON(GitHub Pages), 오늘 하늘은 빌드 때 계산한 표. 워크플로우 카드는 `~/Desktop/toss/apps/zodiac-today.md`, 설계는 `steps/3-design/wireframes/zodiac-today-flow.md`.
+서버·로그인 없음. 저장은 기기 로컬(`Storage`), 콘텐츠는 정적 JSON(GitHub Pages), 오늘 하늘은 빌드 때 계산한 표. 워크플로우 카드는 `~/Desktop/toss/apps/byeol-today.md`, 설계는 `steps/3-design/wireframes/byeol-today-flow.md`.
 
 ## 실행
 
@@ -11,7 +11,7 @@ npm run content             # content/content.source.json 검증(스키마·이�
 npm run sky                 # 오늘 하늘 표(2026-10-01~2028-12-31)·별자리 경계 표(1930~2030) → client/src/sky/*.json + static/sky-YYYY.json
 cd client && npm install
 npm run dev                 # AIT Devtools 가 브릿지를 모킹
-npm run typecheck && npm test && npm run build   # tsc · vitest · vite build && ait build → client/zodiac-today.ait
+npm run typecheck && npm test && npm run build   # tsc · vitest · vite build && ait build → client/byeol-today.ait
 ```
 
 ## 검사

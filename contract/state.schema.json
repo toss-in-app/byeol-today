@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://toss-in-app.github.io/zodiac-today/state.schema.json",
-  "title": "zodiac-today 기기 저장 v1 (Storage 키)",
+  "$id": "https://toss-in-app.github.io/byeol-today/state.schema.json",
+  "title": "byeol-today 기기 저장 v1 (Storage 키)",
   "description": "기기 로컬 Storage 에 문자열(JSON)로 저장. 개인정보 없음 — 생일·태어난 해는 저장하지 않고 고른 별자리만. 모양이 다르면 클라는 빈 값으로 취급한다.",
   "type": "object",
   "required": [

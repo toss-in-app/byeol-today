@@ -7,7 +7,7 @@ import { withTimeout } from '../lib/async';
 import type { PhaseId, SignId, Transit } from '../sky';
 import bundledJson from './bundled.json';
 
-export const STATIC_BASE_URL = 'https://toss-in-app.github.io/zodiac-today';
+export const STATIC_BASE_URL = 'https://toss-in-app.github.io/byeol-today';
 export const CONTENT_URL = `${STATIC_BASE_URL}/content.json`;
 export const TERMS_URL = `${STATIC_BASE_URL}/terms/`;
 export const PRIVACY_URL = `${STATIC_BASE_URL}/privacy/`;

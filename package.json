@@ -1,5 +1,5 @@
 {
-  "name": "zodiac-today",
+  "name": "byeol-today",
   "private": true,
   "type": "module",
   "description": "오늘의 별자리 운세 — 앱인토스 미니앱. client/ 가 앱, 나머지는 콘텐츠 계약·오늘 하늘 표·정적 호스팅 자료",

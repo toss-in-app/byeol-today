@@ -10,7 +10,7 @@ import { isSignId, type SignId } from '../sky';
  * 히스토리 바닥(첫 화면)에서는 토스앱이 종료 확인 창을 띄워요(커뮤니티 3052, 토스 답변).
  * 그래서 화면 전환은 `history.pushState` 로만 쌓고, `replaceState` 는 쓰지 않아요(852·3107).
  *
- * 딥링크(`intoss://zodiac-today/match?a=aries&b=leo`)는 `Environment.initialURL` 로 읽어, 히스토리 바닥 항목이
+ * 딥링크(`intoss://byeol-today/match?a=aries&b=leo`)는 `Environment.initialURL` 로 읽어, 히스토리 바닥 항목이
  * 그릴 화면(`baseRoute`)만 메모리에 바꿔요. URL 은 건드리지 않아요.
  */
 
@@ -52,7 +52,7 @@ export function routeToHash(route: Route): string {
   }
 }
 
-/** `intoss://zodiac-today/match?a=aries&b=leo` 같은 스킴 URL 에서 첫 화면을 골라요. 모르면 null. */
+/** `intoss://byeol-today/match?a=aries&b=leo` 같은 스킴 URL 에서 첫 화면을 골라요. 모르면 null. */
 export function routeFromSchemeUrl(url: string): Route | null {
   const m = /^[a-z][a-z0-9+.-]*:\/\/[^/?#]+\/?([^?#]*)(?:\?([^#]*))?/i.exec(url.trim());
   if (!m) return null;
@@ -133,7 +133,7 @@ export function installDevBackHandler(): () => void {
     return graniteEvent.addEventListener('backEvent', {
       onEvent: () => {
         if (currentDepth() > 0) window.history.back();
-        else console.info('[zodiac-today] 첫 화면에서 뒤로가기 — 토스앱에서는 종료 확인 창이 떠요');
+        else console.info('[byeol-today] 첫 화면에서 뒤로가기 — 토스앱에서는 종료 확인 창이 떠요');
       },
     });
   } catch {
