@@ -61,17 +61,20 @@ describe('SignScreen — 내 별자리로 등록', () => {
     await waitFor(() => expect(onRegister).toHaveBeenCalledWith('leo', '엄마'));
   });
 
-  it('이미 내 별자리면 주 버튼이 궁합 보기이고 글자 줄에 내 별자리 ✓, 등록 버튼은 없어요', () => {
+  it('이미 내 별자리면 첫 아이콘이 내 별자리 ✓ 상태 표시(버튼 아님), 등록 버튼은 없어요', () => {
     renderSign(true);
     expect(screen.getByText('내 별자리 ✓')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: '내 별자리로 등록' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /내 별자리/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '궁합 보기' }));
     expect(onOpenMatch).toHaveBeenCalled();
   });
 
-  it('등록 전엔 글자 줄의 궁합 보기로도 궁합에 가요', () => {
+  it('아이콘 행: 등록 전엔 내 별자리·궁합·카드 저장·링크 공유 네 버튼, 궁합 아이콘(글자 "궁합")으로 궁합에 가요', () => {
     renderSign();
-    fireEvent.click(screen.getByRole('button', { name: '궁합 보기' }));
+    expect(screen.getAllByRole('button').filter((b) => b.className === 'byeol-action').map((b) => b.getAttribute('aria-label'))).toEqual(['내 별자리로 등록', '궁합 보기', '카드 저장', '링크 공유']);
+    const match = screen.getByRole('button', { name: '궁합 보기' });
+    expect(match).toHaveTextContent('궁합');
+    fireEvent.click(match);
     expect(onOpenMatch).toHaveBeenCalled();
   });
 

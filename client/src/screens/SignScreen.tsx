@@ -2,6 +2,7 @@ import { colors } from '@toss/tds-colors';
 import { BottomSheet, Button, List, ListRow, Text, TextButton, Top, useDialog, useToast } from '@toss/tds-mobile';
 import { useEffect, useState } from 'react';
 
+import { ActionRow, type ActionItem } from '../components/ActionRow';
 import { AdBanner } from '../components/AdBanner';
 import { AdMark } from '../components/AdMark';
 import { ChartSheet } from '../components/ChartSheet';
@@ -61,9 +62,9 @@ function ReadingRows({ reading, lucky }: { reading: Reading; lucky: Lucky }) {
 }
 
 /**
- * 별자리 자세히 — 머리(이름·날짜) → 종이 하늘 블록(천체도·'천체도 보기') → 성향 → 주 버튼 한 개 + 글자 줄(시안 2, 2026-10-24)
+ * 별자리 자세히 — 머리(이름·날짜) → 종이 하늘 블록(천체도·'천체도 보기') → 성향 → 아이콘 행(시안 1, 2026-10-24 사용자 "아이콘 1로 해")
  * → 총운·사랑·일·돈·달 모양·오늘의 행운 목록 → 내일 운세(리워드) → 배너.
- * 등록 전: 주 버튼 '내 별자리로 등록', 글자 줄 '궁합 보기 · 카드 저장 · 링크 공유'. 등록 뒤: 주 버튼 '궁합 보기', 글자 줄 '내 별자리 ✓ · 카드 저장 · 링크 공유'.
+ * 아이콘 행: 종이색 원 아이콘 + 글자 — 내 별자리(등록 전엔 등록 버튼, 등록 뒤엔 잉크 원 + 체크 '내 별자리 ✓' 상태 표시) · 궁합 · 카드 저장 · 링크 공유.
  * 광고를 띄우는 버튼에는 AD 표시와 '광고를 보면 …' 안내가 항상 같이 있어요(mandalartplan 3.0.1 반려 교훈 — 재시도도 같은 버튼).
  */
 export function SignScreen({
@@ -143,11 +144,13 @@ export function SignScreen({
     }
   };
 
-  const dot = (
-    <Text typography="t7" color={colors.grey400} aria-hidden>
-      ·
-    </Text>
-  );
+  // 아이콘 행(시안 1): 등록 전 '내 별자리'(등록) · 등록 뒤 '내 별자리 ✓'(상태) → 궁합 → 카드 저장(지원할 때만) → 링크 공유. 공유 중엔 두 공유 버튼을 잠가요
+  const actions: ActionItem[] = [
+    inMine ? { icon: 'check', label: '내 별자리 ✓', filled: true } : { icon: 'star', label: '내 별자리', name: '내 별자리로 등록', onClick: () => void openSheet() },
+    { icon: 'match', label: '궁합', name: '궁합 보기', onClick: onOpenMatch },
+  ];
+  if (day && onSaveCard) actions.push({ icon: 'card', label: sharing === 'card' ? '저장 중…' : '카드 저장', name: '카드 저장', disabled: sharing !== null, onClick: () => void share('card') });
+  if (day) actions.push({ icon: 'link', label: sharing === 'link' ? '공유 중…' : '링크 공유', name: '링크 공유', disabled: sharing !== null, onClick: () => void share('link') });
 
   return (
     <>
@@ -193,45 +196,8 @@ export function SignScreen({
         {info.trait}
       </Text>
 
-      {/* 주 버튼 한 개 + 글자 줄(시안 2): 등록 전엔 등록이 주 버튼, 등록 뒤엔 궁합이 주 버튼 */}
-      <div style={{ margin: '0 20px 18px' }}>
-        {inMine ? (
-          <Button display="block" size="large" color="primary" onClick={onOpenMatch}>
-            궁합 보기
-          </Button>
-        ) : (
-          <Button display="block" size="large" color="primary" onClick={() => void openSheet()}>
-            내 별자리로 등록
-          </Button>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
-          {inMine ? (
-            <Text typography="t7" color={colors.grey600}>
-              내 별자리 ✓
-            </Text>
-          ) : (
-            <TextButton size="small" color={colors.grey700} onClick={onOpenMatch}>
-              궁합 보기
-            </TextButton>
-          )}
-          {day && onSaveCard ? (
-            <>
-              {dot}
-              <TextButton size="small" color={colors.grey700} disabled={sharing !== null} onClick={() => void share('card')}>
-                {sharing === 'card' ? '저장 중…' : '카드 저장'}
-              </TextButton>
-            </>
-          ) : null}
-          {day ? (
-            <>
-              {dot}
-              <TextButton size="small" color={colors.grey700} disabled={sharing !== null} onClick={() => void share('link')}>
-                {sharing === 'link' ? '공유 중…' : '링크 공유'}
-              </TextButton>
-            </>
-          ) : null}
-        </div>
-      </div>
+      {/* 아이콘 행(시안 1): 종이색 원 아이콘 네 개 + 글자. 등록 뒤 첫 원은 잉크색 + 체크 */}
+      <ActionRow items={actions} style={{ margin: '0 20px 18px' }} />
 
       {reading && lucky ? <ReadingRows reading={reading} lucky={lucky} /> : null}
 

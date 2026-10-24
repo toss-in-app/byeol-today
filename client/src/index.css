@@ -72,6 +72,17 @@ body {
   transform-origin: center;
   animation: byeol-pulse 2.6s ease-out infinite;
 }
+/* 자세히 아이콘 행(시안 1) — 누르면 원이 살짝 줄고, 키보드 초점은 원 둘레로 */
+.byeol-action-circle {
+  transition: transform 0.12s ease-out;
+}
+.byeol-action:active:not(:disabled) .byeol-action-circle {
+  transform: scale(0.94);
+}
+.byeol-action:focus-visible .byeol-action-circle {
+  outline: 2px solid #4c5fd5;
+  outline-offset: 2px;
+}
 /* 당겨서 새로 고침 중 돌림 표시 */
 @keyframes byeol-spin {
   to {
