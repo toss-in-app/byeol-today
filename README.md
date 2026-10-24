@@ -30,7 +30,7 @@ contract/                  # 계약 v1 (3단계 승인본). 바뀌면 CHANGELOG.
 └── samples/
 content/content.source.json  # 콘텐츠 원본(사람이 검수)
 scripts/                     # build-content · build-sky · check-contract
-static/                      # GitHub Pages: content.json · sky-YYYY.json · index · terms · privacy (8단계에서 배포)
+static/                      # GitHub Pages: content.json · sky-YYYY.json · og.png · index · terms · privacy (.github/workflows/pages.yml, 절차는 runbooks/byeol-today-deploy.md)
 client/                      # 미니앱 (React 18 + Vite + TDS + @apps-in-toss/web-framework 3.2.0)
 └── src/
     ├── content/             #   번들 콘텐츠·원격 로더
