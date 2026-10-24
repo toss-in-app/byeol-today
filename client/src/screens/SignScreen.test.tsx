@@ -1,15 +1,10 @@
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { bundledContent } from '../content';
-import { resetSignCtaForTests } from '../lib/signCta';
 import type { AddMineResult } from '../lib/state';
 import { SignScreen } from './SignScreen';
-
-afterEach(() => {
-  resetSignCtaForTests();
-});
 
 const OK: AddMineResult = { ok: true, state: { version: 1, items: [] }, item: { id: 'aaaaaaaaaaaaaaaa', sign: 'leo', label: null, addedAt: 0 } };
 
@@ -66,27 +61,21 @@ describe('SignScreen — 내 별자리로 등록', () => {
     await waitFor(() => expect(onRegister).toHaveBeenCalledWith('leo', '엄마'));
   });
 
-  it('이미 내 별자리면 하단 알약 대신 배지, 궁합 보기는 항상', () => {
+  it('이미 내 별자리면 주 버튼이 궁합 보기이고 글자 줄에 내 별자리 ✓, 등록 버튼은 없어요', () => {
     renderSign(true);
-    expect(screen.getByText('내 별자리')).toBeInTheDocument();
+    expect(screen.getByText('내 별자리 ✓')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '내 별자리로 등록' })).not.toBeInTheDocument();
-    expect(screen.queryByText('＋ 내 별자리')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '궁합 보기' }));
     expect(onOpenMatch).toHaveBeenCalled();
   });
 
-  it('하단 알약을 ✕로 닫으면 사라지고(세션 동안), 카드 머리의 ＋ 내 별자리로 등록 시트를 열 수 있어요', async () => {
+  it('등록 전엔 글자 줄의 궁합 보기로도 궁합에 가요', () => {
     renderSign();
-    fireEvent.click(screen.getByRole('button', { name: '등록 안내 닫기' }));
-    expect(screen.queryByRole('button', { name: '내 별자리로 등록' })).not.toBeInTheDocument();
-    cleanup();
-    renderSign();
-    expect(screen.queryByRole('button', { name: '내 별자리로 등록' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('＋ 내 별자리'));
-    expect(await screen.findByText('사자자리를 내 별자리로 등록해요')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '궁합 보기' }));
+    expect(onOpenMatch).toHaveBeenCalled();
   });
 
-  it('카드에 오늘의 행운(색 · 물건 · 숫자)이 있어요', () => {
+  it('목록에 오늘의 행운(색 · 물건 · 숫자) 행이 있어요', () => {
     renderSign();
     expect(screen.getByText('오늘의 행운')).toBeInTheDocument();
     expect(screen.getByText(/^[가-힣]+ · [가-힣 ]+ · 숫자 [1-9]$/)).toBeInTheDocument();
